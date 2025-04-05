@@ -10,7 +10,7 @@
 [![codecov](https://codecov.io/github/Luis-Rosario-Alers/BankOps/graph/badge.svg?token=OVPU0O07GO)](https://codecov.io/github/Luis-Rosario-Alers/BankOps)
 [![Build and Release](https://github.com/Luis-Rosario-Alers/BankOps/actions/workflows/python-build-release.yml/badge.svg)](https://github.com/Luis-Rosario-Alers/BankOps/actions/workflows/python-build-release.yml)
 
-[FAQ❓](FAQ.md)| [Contributing🤝](CONTRIBUTING)
+[FAQ❓](FAQ.md)| [Contributing🤝](CONTRIBUTING.md)
 
 ## **Description**
 
