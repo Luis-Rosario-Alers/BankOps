@@ -7,6 +7,3 @@ line-length = 88
 
 [tool.pytest]
 pythonpath = [".", "src"]
-
-[tool.bandit]
-exclude_dirs = ['tests']

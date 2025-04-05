@@ -32,4 +32,4 @@ repos:
     rev: 1.8.3
     hooks:
       - id: bandit
-        args: []
+        args: ["-c", ".bandit.yaml"]
