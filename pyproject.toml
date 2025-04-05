@@ -1,5 +1,5 @@
 [tool.isort]
-profile = "black"
+profile = 'black'
 line_length = 88
 
 [tool.black]
@@ -8,10 +8,5 @@ line-length = 88
 [tool.pytest]
 pythonpath = [".", "src"]
 
-[build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.mypy]
-python_version = "3.8"
-pythonpath = [".", "src"]
+[tool.bandit]
+exclude_dirs = ['tests']

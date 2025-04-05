@@ -1,6 +1,8 @@
-# Contributing to the Carbon Calculator project
+# Contributing to the BankOps project
 
-Thank you for your interest in contributing to the Carbon Calculator project! We welcome contributions from everyone. This guide explains how you can help improve the project.
+Thank you for your interest in contributing to the BankOps project!
+We welcome contributions from everyone.
+This guide explains how you can help improve the project.
 
 ## Ways to Contribute 🤝
 
@@ -9,7 +11,7 @@ There are many ways you can contribute to the project:
 1. **Report Bugs**
    - Use the GitHub issue tracker
    - Include detailed steps to reproduce
-   - Describe expected vs actual behavior
+   - Describe expected vs. actual behavior
    - Include system information
 
 2. **Suggest Enhancements**
@@ -112,7 +114,7 @@ When submitting a PR:
 We use Conventional Commits with emojis to add visual context to our commit messages. Here's how to format your commits:
 
 ```env
-<emoji> <type>(<scope>): <subject>
+<emoji>: <subject>
 
 [optional body]
 [optional footer(s)]
@@ -120,7 +122,7 @@ We use Conventional Commits with emojis to add visual context to our commit mess
 
 ### Type
 
-Must be one of the following:
+Should be part of gitmoji:
 
 - `feat`: ✨ A new feature
 - `fix`: 🐛 A bug fix
@@ -134,10 +136,6 @@ Must be one of the following:
 - `chore`: 🔧 Other changes that don't modify src or test files
 - `revert`: ⏪️ Reverts a previous commit
 
-### Scope
-
-The scope should be the name of the module affected (folder name or other boundary).
-
 ### Subject
 
 The subject contains a succinct description of the change:
@@ -149,14 +147,14 @@ The subject contains a succinct description of the change:
 ### Examples
 
 ```
-✨ feat(calculator): add temperature adjustment feature
-🐛 fix(ui): resolve input validation error
-📝 docs(readme): update installation steps
-♻️ refactor(core): simplify emissions calculation logic
-✅ test(api): add integration tests for weather service
-🔧 chore(deps): update dependency versions
-⚡️ perf(db): optimize database queries
-🚀 ci(deploy): add automated release workflow
+✨: add temperature adjustment feature
+🐛: resolve input validation error
+📝: update installation steps
+♻️: simplify emissions calculation logic
+✅: add integration tests for weather service
+🔧: update dependency versions
+⚡️: optimize database queries
+🚀: add automated release workflow
 ```
 
 ### Full Example
@@ -197,7 +195,7 @@ Common emojis used in our commits:
 When making breaking changes, add `BREAKING CHANGE:` in the commit body or footer:
 
 ```
-💥 feat(api)!: remove deprecated endpoints
+💥 remove deprecated endpoints
 
 BREAKING CHANGE: The following endpoints have been removed:
 - /v1/calculate
@@ -209,15 +207,9 @@ Migration guide: Use /v2/calculate and /v2/export instead.
 
 ### VS Code Extension
 
-For VS Code users, we recommend installing the [Conventional Commits](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits) extension to help format commit messages according to these conventions. This extension provides:
-
-- Interactive commit message builder
-- Commit type selection
-- Scope suggestions
-- Breaking change prompts
-- Emoji support
-
-
+For VS Code users,
+we recommend
+installing the [Gitmoji Commits](https://marketplace.visualstudio.com/items?itemName=seatonjiang.gitmoji-vscode) extension to help format commit messages according to these conventions.
 
 For more information on the project, please refer to the [DEVELOPER](./docs/DEVELOPER.md) file.
 
@@ -227,14 +219,8 @@ Please note that this project is governed by the [Contributor Covenant Code of C
 
 ## Security Code of Conduct🔒
 
-If any security vulnerabilities are found in this project please refer to the [Security Code of Conduct🔒](SECURITY.md) for more information on how to handle notifying us.
+If any security vulnerabilities are found in this project, please refer to the [Security Code of Conduct🔒](SECURITY.md) for more information on how to handle notifying us.
 
 ## Getting Help🤚
 
 Make an issue or create a discussion. We are glad to help anyone that needs it.
-
-If you need inspiration on what to add we will have a couple anticipated features that you could help us work on.
-
-## Acknowledgements👋
-
-Me and my partner appreciate all contributions made to this project as it makes our lives so much easier. So thank you💖

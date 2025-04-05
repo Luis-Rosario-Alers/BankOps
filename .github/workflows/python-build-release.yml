@@ -21,10 +21,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-      # Set up Python 3.12
+      # Set up Python 3.13
       - uses: actions/setup-python@v5.0.0
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       # Install dependencies
       - run: |
           python -m pip install --upgrade pip
@@ -48,7 +48,7 @@ jobs:
               src/main.py \
               --windowed \
               --noconsole \
-              --name CarbonCalculator
+              --name BankOps
           elif [ "$RUNNER_OS" == "macOS" ]; then
             pyinstaller \
               --add-data "src/data/resources:resources" \
@@ -57,7 +57,7 @@ jobs:
               src/main.py \
               --windowed \
               --noconsole \
-              --name CarbonCalculator
+              --name BankOps
           else
             pyinstaller \
               --add-data "src/data/resources:resources" \
@@ -66,7 +66,7 @@ jobs:
               src/main.py \
               --windowed \
               --noconsole \
-              --name CarbonCalculator
+              --name BankOps
           fi
         shell: bash
       # Archive the build artifacts
@@ -77,30 +77,30 @@ jobs:
           echo "Files in the dist directory:"
           ls -al dist
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            if [ -d dist/CarbonCalculator ]; then
-              rm -rf build/CarbonCalculator
+            if [ -d dist/BankOps ]; then
+              rm -rf build/BankOps
               mkdir -p build/
-              mv dist/CarbonCalculator build/
+              mv dist/BankOps build/
             else
-              echo "Directory dist/CarbonCalculator not found"
+              echo "Directory dist/BankOps not found"
               exit 1
             fi
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            if [ -d dist/CarbonCalculator.app ]; then
-              rm -rf build/CarbonCalculator
+            if [ -d dist/BankOps.app ]; then
+              rm -rf build/BankOps
               mkdir -p build/
-              mv dist/CarbonCalculator.app build/
+              mv dist/BankOps.app build/
             else
-              echo "Directory dist/CarbonCalculator.app not found"
+              echo "Directory dist/BankOps.app not found"
               exit 1
             fi
           elif [ "$RUNNER_OS" == "Linux" ]; then
-            if [ -d dist/CarbonCalculator ]; then
-              rm -rf build/CarbonCalculator
+            if [ -d dist/BankOps ]; then
+              rm -rf build/BankOps
               mkdir -p build/
-              mv dist/CarbonCalculator build/
+              mv dist/BankOps build/
             else
-              echo "Directory dist/CarbonCalculator not found"
+              echo "Directory dist/BankOps not found"
               exit 1
             fi
           fi
@@ -108,7 +108,7 @@ jobs:
       # Upload the build artifacts
       - uses: actions/upload-artifact@v4
         with:
-          name: CarbonCalculator-${{ matrix.os }}
+          name: BankOps-${{ matrix.os }}
           path: build/
 
   release:
@@ -121,15 +121,15 @@ jobs:
       # Download the build artifacts for each OS
       - uses: actions/download-artifact@v4
         with:
-          name: CarbonCalculator-ubuntu-latest
+          name: BankOps-ubuntu-latest
           path: linux/
       - uses: actions/download-artifact@v4
         with:
-          name: CarbonCalculator-macos-latest
+          name: BankOps-macos-latest
           path: macos/
       - uses: actions/download-artifact@v4
         with:
-          name: CarbonCalculator-windows-latest
+          name: BankOps-windows-latest
           path: windows/
 
       # Debug: List downloaded artifacts
@@ -144,9 +144,9 @@ jobs:
 
       - name: Zip artifacts
         run: |
-          cd windows && zip -r CarbonCalculator-windows-latest.zip CarbonCalculator/
-          cd ../macos && zip -r CarbonCalculator-macos-latest.zip CarbonCalculator.app/
-          cd ../linux && zip -r CarbonCalculator-linux-latest.zip CarbonCalculator/
+          cd windows && zip -r BankOps-windows-latest.zip BankOps/
+          cd ../macos && zip -r BankOps-macos-latest.zip BankOps.app/
+          cd ../linux && zip -r BankOps-linux-latest.zip BankOps/
         shell: bash
       # Create release
       - name: Release
@@ -154,6 +154,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            windows/CarbonCalculator-windows-latest.zip
-            macos/CarbonCalculator-macos-latest.zip
-            linux/CarbonCalculator-linux-latest.zip
+            windows/BankOps-windows-latest.zip
+            macos/BankOps-macos-latest.zip
+            linux/BankOps-linux-latest.zip
