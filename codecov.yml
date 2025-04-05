@@ -1,0 +1,19 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        branches:
+          - main
+          - developer
+    patch:
+      default:
+        target: auto
+        branches:
+          - main
+          - developer
+
+ignore:
+  - "src/ui/*"
+  - "setup.py"
+  - "tests/**/*"

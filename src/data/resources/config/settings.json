@@ -1,0 +1,18 @@
+{
+    "API Keys": {
+        "OpenWeatherMap API Key": "",
+        "IP Geolocation API Key": ""
+    },
+    "Paths": {
+        "emissions_modifiers_path": ""
+    },
+    "Preferences": {
+        "Temperature Measurement Unit": "Celsius",
+        "Calculation Unit of Measurement": "Kilograms",
+        "Language": "English",
+        "Theme": "Light",
+        "Fetch Local Temperatures On Startup": false,
+        "Use Temperature": true,
+        "User ID": 0
+    }
+}
