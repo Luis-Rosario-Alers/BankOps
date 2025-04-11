@@ -4,17 +4,28 @@ from ui.generated.ui_login_window import Ui_login_window
 
 
 class LoginView(QMainWindow, Ui_login_window):
-    def __init__(self, controller):
+    def __init__(self, model):
         super().__init__()
         self.setupUi(self)
-        self.controller = controller
+        self.model = model
+        self.__connect_signals()
+
+    def __connect_signals(self):
+        self.authenticatePushButton.clicked.connect(self.on_authenticate_button_clicked)
 
     def on_authenticate_button_clicked(self):
-        self.accountNumberLineEdit.clear()
-        self.pinLineEdit.clear()
-        account_number = int(self.accountNumberLineEdit.text())
-        pin = int(self.pinLineEdit.text())
-        self.controller.process_login(account_number, pin)
+        """
+        Handles click event for the authenticating button.
+        :return: None
+        """
+
+        username = self.usernameLineEdit.text()
+        password = self.passwordLineEdit.text()
+
+        self.usernameLineEdit.clear()
+        self.passwordLineEdit.clear()
+
+        self.model.process_login(username, password)
 
     def show_success(self, username):
         """show a success message to user"""
@@ -24,4 +35,4 @@ class LoginView(QMainWindow, Ui_login_window):
 
     def show_failure(self):
         """show a failure message to user"""
-        QMessageBox.critical(self, "Failure", "Incorrect account number or pin")
+        QMessageBox.critical(self, "Failure", "Incorrect username or password.")

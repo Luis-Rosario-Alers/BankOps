@@ -77,37 +77,37 @@ class Ui_login_window(object):
         self.authenticateContainerWidget.setObjectName("authenticateContainerWidget")
         self.verticalLayout = QVBoxLayout(self.authenticateContainerWidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.accountNumberContainerWidget = QWidget(self.authenticateContainerWidget)
-        self.accountNumberContainerWidget.setObjectName("accountNumberContainerWidget")
-        self.horizontalLayout = QHBoxLayout(self.accountNumberContainerWidget)
+        self.usernameContainerWidget = QWidget(self.authenticateContainerWidget)
+        self.usernameContainerWidget.setObjectName("usernameContainerWidget")
+        self.horizontalLayout = QHBoxLayout(self.usernameContainerWidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.accountNumberLabel = QLabel(self.accountNumberContainerWidget)
-        self.accountNumberLabel.setObjectName("accountNumberLabel")
+        self.usernameLabel = QLabel(self.usernameContainerWidget)
+        self.usernameLabel.setObjectName("usernameLabel")
 
-        self.horizontalLayout.addWidget(self.accountNumberLabel)
+        self.horizontalLayout.addWidget(self.usernameLabel)
 
-        self.accountNumberLineEdit = QLineEdit(self.accountNumberContainerWidget)
-        self.accountNumberLineEdit.setObjectName("accountNumberLineEdit")
+        self.usernameLineEdit = QLineEdit(self.usernameContainerWidget)
+        self.usernameLineEdit.setObjectName("usernameLineEdit")
 
-        self.horizontalLayout.addWidget(self.accountNumberLineEdit)
+        self.horizontalLayout.addWidget(self.usernameLineEdit)
 
-        self.verticalLayout.addWidget(self.accountNumberContainerWidget)
+        self.verticalLayout.addWidget(self.usernameContainerWidget)
 
-        self.pinContainerWidget = QWidget(self.authenticateContainerWidget)
-        self.pinContainerWidget.setObjectName("pinContainerWidget")
-        self.horizontalLayout_2 = QHBoxLayout(self.pinContainerWidget)
+        self.passwordContainerWidget = QWidget(self.authenticateContainerWidget)
+        self.passwordContainerWidget.setObjectName("passwordContainerWidget")
+        self.horizontalLayout_2 = QHBoxLayout(self.passwordContainerWidget)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.pinLabel = QLabel(self.pinContainerWidget)
-        self.pinLabel.setObjectName("pinLabel")
+        self.passwordLabel = QLabel(self.passwordContainerWidget)
+        self.passwordLabel.setObjectName("passwordLabel")
 
-        self.horizontalLayout_2.addWidget(self.pinLabel)
+        self.horizontalLayout_2.addWidget(self.passwordLabel)
 
-        self.pinLineEdit = QLineEdit(self.pinContainerWidget)
-        self.pinLineEdit.setObjectName("pinLineEdit")
+        self.passwordLineEdit = QLineEdit(self.passwordContainerWidget)
+        self.passwordLineEdit.setObjectName("passwordLineEdit")
 
-        self.horizontalLayout_2.addWidget(self.pinLineEdit)
+        self.horizontalLayout_2.addWidget(self.passwordLineEdit)
 
-        self.verticalLayout.addWidget(self.pinContainerWidget)
+        self.verticalLayout.addWidget(self.passwordContainerWidget)
 
         self.authenticatePushButton = QPushButton(self.authenticateContainerWidget)
         self.authenticatePushButton.setObjectName("authenticatePushButton")
@@ -137,10 +137,12 @@ class Ui_login_window(object):
         self.loginLabel.setText(
             QCoreApplication.translate("login_window", "Login", None)
         )
-        self.accountNumberLabel.setText(
-            QCoreApplication.translate("login_window", "Account number:", None)
+        self.usernameLabel.setText(
+            QCoreApplication.translate("login_window", "Username:", None)
         )
-        self.pinLabel.setText(QCoreApplication.translate("login_window", "PIN:", None))
+        self.passwordLabel.setText(
+            QCoreApplication.translate("login_window", "Password:", None)
+        )
         self.authenticatePushButton.setText(
             QCoreApplication.translate("login_window", "Authenticate", None)
         )

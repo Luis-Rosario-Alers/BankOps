@@ -73,33 +73,33 @@
        <widget class="QWidget" name="authenticateContainerWidget" native="true">
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QWidget" name="accountNumberContainerWidget" native="true">
+          <widget class="QWidget" name="usernameContainerWidget" native="true">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLabel" name="accountNumberLabel">
+             <widget class="QLabel" name="usernameLabel">
               <property name="text">
-               <string>Account number:</string>
+               <string>Username:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="accountNumberLineEdit"/>
+             <widget class="QLineEdit" name="usernameLineEdit"/>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QWidget" name="pinContainerWidget" native="true">
+          <widget class="QWidget" name="passwordContainerWidget" native="true">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="pinLabel">
+             <widget class="QLabel" name="passwordLabel">
               <property name="text">
-               <string>PIN:</string>
+               <string>Password:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="pinLineEdit"/>
+             <widget class="QLineEdit" name="passwordLineEdit"/>
             </item>
            </layout>
           </widget>
