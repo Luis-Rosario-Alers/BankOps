@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+    <file alias="default_user.jpg">default_user.jpg</file>
+</qresource>
+</RCC>
