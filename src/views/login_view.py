@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QMessageBox
 
-from ui.generated.ui_login_window import Ui_login_window
+from src.ui.generated.ui_login_window import Ui_login_window
 
 
 class LoginView(QMainWindow, Ui_login_window):
@@ -13,7 +13,7 @@ class LoginView(QMainWindow, Ui_login_window):
     def __connect_signals(self):
         self.authenticatePushButton.clicked.connect(self.on_authenticate_button_clicked)
 
-    def on_authenticate_button_clicked(self):
+    def on_authenticate_button_clicked(self) -> None:
         """
         Handles click event for the authenticating button.
         :return: None
@@ -27,12 +27,12 @@ class LoginView(QMainWindow, Ui_login_window):
 
         self.model.process_login(username, password)
 
-    def show_success(self, username):
+    def show_success(self, username) -> None:
         """show a success message to user"""
         QMessageBox.information(
             self, "Success", f"Thank you {username}, you are now logged in."
         )
 
-    def show_failure(self):
+    def show_failure(self, message) -> None:
         """show a failure message to user"""
-        QMessageBox.critical(self, "Failure", "Incorrect username or password.")
+        QMessageBox.critical(self, "Failure", message)

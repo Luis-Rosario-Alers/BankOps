@@ -1,11 +1,11 @@
 from PySide6.QtCore import Signal
 
-from controllers.base_controller import BaseController
-from services.api_client_service import APIClient
+from src.controllers.base_controller import BaseController
+from src.services.api_client_service import APIClient
 
 
 class LoginModel(BaseController):
-    login_successful = Signal()
+    login_successful = Signal(dict)
 
     def __init__(self, login_view):
         super().__init__()
@@ -18,11 +18,18 @@ class LoginModel(BaseController):
     def process_login(self, username: str, password: str):
         api_client = APIClient()
 
-        response = api_client.login(username, password)
+        login_response: dict = api_client.login(username, password)
 
-        if response.get("access_token"):
-            # Emit signal to indicate successful login
-            self.login_successful.emit()
-            self.login_view.show_success(username)
-        else:
-            self.login_view.show_failure()
+        try:
+            # this ensures we get an auth token back from the server.
+            if login_response.get("access_token"):
+                user_data = api_client.retrieve_user_info()
+                self.login_successful.emit(user_data)
+                return user_data
+            else:
+                # Handle invalid credentials
+                error_message = login_response.get("error", "Unknown error occurred.")
+                self.login_view.show_failure(error_message)
+        except Exception as e:
+            # Handle any exceptions that occur during the login process
+            self.login_view.show_failure(f"An error occurred: {str(e)}")

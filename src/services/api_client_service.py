@@ -27,7 +27,7 @@ class APIClient(metaclass=SingletonMeta):
         :return: user login details
         """
 
-        url = f"{self.base_url}auth/sessions/users"
+        url: str = f"{self.base_url}auth/sessions/users"
 
         results = requests.post(
             url=url,
@@ -38,9 +38,44 @@ class APIClient(metaclass=SingletonMeta):
 
         if results.status_code == 201:
             self.token = results.json().get("access_token")
+            self.headers["Authorization"] = f"Bearer {self.token}"
             return results.json()
         else:
             return results.json()
+
+    def retrieve_user_info(self) -> dict[str, dict] | None:
+        """
+        Send a request to retrieve user information.
+        :return: Logged-in user account info
+        """
+
+        user_profile_url: str = f"{self.base_url}users/current"
+
+        # This is meant to grab current user information
+        # specifically for the user_id, which will be used to
+        # fetch user account information.
+        user_profile_response = requests.get(
+            url=user_profile_url,
+            headers=self.headers,
+            timeout=self.timeout,
+        )
+
+        # Check if the request was successful
+        if user_profile_response.status_code == 200:
+            user_id = user_profile_response.json().get("user").get("id")
+            user_accounts_info = requests.get(
+                url=f"{self.base_url}users/{user_id}/accounts",
+                headers=self.headers,
+                timeout=self.timeout,
+            )
+            if user_accounts_info.status_code == 200:
+                return {
+                    "user": user_profile_response.json().get("user"),
+                    "accounts": user_accounts_info.json(),
+                }
+
+        # if the request was not successful, raise an exception
+        raise Exception("Failed to retrieve user information from server")
 
     def create_user(self, email: str, username: str, password: str) -> dict:
         """
@@ -51,7 +86,7 @@ class APIClient(metaclass=SingletonMeta):
         :return: API response
         """
 
-        url = f"{self.base_url}users"
+        url: str = f"{self.base_url}users"
 
         results = requests.post(
             url=url,
