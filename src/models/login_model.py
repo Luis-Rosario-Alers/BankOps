@@ -1,7 +1,6 @@
 from PySide6.QtCore import Signal
 
 from src.controllers.base_controller import BaseController
-from src.services.api_client_service import APIClient
 
 
 class LoginModel(BaseController):
@@ -15,11 +14,8 @@ class LoginModel(BaseController):
     def __connect_signals(self):
         pass
 
-    def process_login(self, username: str, password: str):
-        api_client = APIClient()
-
+    def process_login(self, username: str, password: str, api_client):
         login_response: dict = api_client.login(username, password)
-
         try:
             # this ensures we get an auth token back from the server.
             if login_response.get("access_token"):

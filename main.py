@@ -105,13 +105,6 @@ class ApplicationManager(QObject):
 
         self.main_window.show()
 
-        QMessageBox.information(
-            None,
-            "Login Successful",
-            f"Welcome {user_data.get('username', 'User')}!\n"
-            f"Main application window would open here.",
-        )
-
 
 def main() -> int | None:
     logger = setup_logging()
