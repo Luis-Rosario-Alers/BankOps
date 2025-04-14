@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>937</width>
-    <height>715</height>
+    <width>1240</width>
+    <height>904</height>
    </rect>
   </property>
   <property name="palette">
@@ -382,7 +382,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>:/dashboard/icons/bank_PNG3-2926375216.png</pixmap>
+          <pixmap resource="icons.qrc">:/dashboard/icons/bank_PNG3-2926375216.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -450,7 +450,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="icons.qrc">
               <normaloff>:/dashboard/icons/bell.svg</normaloff>:/dashboard/icons/bell.svg</iconset>
             </property>
             <property name="iconSize">
@@ -572,7 +572,7 @@
                    <string>Dashboard</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="icons.qrc">
                     <normaloff>:/dashboard/icons/clipboard.svg</normaloff>:/dashboard/icons/clipboard.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -601,7 +601,7 @@
                    <string>Accounts</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="icons.qrc">
                     <normaloff>:/dashboard/icons/user.svg</normaloff>:/dashboard/icons/user.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -630,7 +630,7 @@
                    <string>Transactions</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="icons.qrc">
                     <normaloff>:/dashboard/icons/money-from-bracket.svg</normaloff>:/dashboard/icons/money-from-bracket.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -662,7 +662,7 @@
                    <string>Bill Payments</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="icons.qrc">
                     <normaloff>:/dashboard/icons/clock</normaloff>:/dashboard/icons/clock</iconset>
                   </property>
                   <property name="iconSize">
@@ -697,7 +697,7 @@
                    <string>Support</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="icons.qrc">
                     <normaloff>:/dashboard/icons/support-svgrepo-com.svg</normaloff>:/dashboard/icons/support-svgrepo-com.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -732,7 +732,7 @@
                    <string>Settings</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="icons.qrc">
                     <normaloff>:/dashboard/icons/gear.svg</normaloff>:/dashboard/icons/gear.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -788,6 +788,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_7"/>
               </widget>
              </item>
             </layout>
@@ -849,6 +850,7 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_14"/>
                  </widget>
                 </item>
                </layout>
@@ -870,7 +872,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>937</width>
+     <width>1240</width>
      <height>33</height>
     </rect>
    </property>

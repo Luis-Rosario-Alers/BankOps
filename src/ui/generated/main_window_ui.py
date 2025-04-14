@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 )
 
 from src.ui.generated import icons_rc  # noqa
-from src.ui.plugins.profile_widget import QProfileButton
+from src.ui.plugins.widgets.profile_widget import QProfileButton
 
 
 class Ui_MainWindow(object):
