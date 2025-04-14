@@ -1,0 +1,18 @@
+<RCC>
+  <qresource prefix="dashboard">
+    <file>icons/bank_PNG3-2926375216.png</file>
+    <file>icons/bell.svg</file>
+    <file>icons/bell-exclamation.svg</file>
+    <file>icons/bell-on.svg</file>
+    <file>icons/bell-ring.svg</file>
+    <file>icons/bell-slash.svg</file>
+    <file>icons/clipboard.svg</file>
+    <file>icons/clock</file>
+    <file>icons/gear.svg</file>
+    <file>icons/id-badge.svg</file>
+    <file>icons/money-from-bracket.svg</file>
+    <file>icons/paper-plane-top.svg</file>
+    <file>icons/support-svgrepo-com.svg</file>
+    <file>icons/user.svg</file>
+  </qresource>
+</RCC>
