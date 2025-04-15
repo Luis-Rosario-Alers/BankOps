@@ -1,5 +1,6 @@
-import PySide6.QtCore
 from PySide6.QtCore import (
+    Property,
+    QAbstractAnimation,
     QEasingCurve,
     QEvent,
     QPoint,
@@ -7,28 +8,34 @@ from PySide6.QtCore import (
     QSequentialAnimationGroup,
 )
 from PySide6.QtGui import QFont, QPainter
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
+from PySide6.QtWidgets import (
+    QApplication,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class SummaryCardWidget(QFrame):
+
     def __init__(self, title, value, is_positive=True, parent=None):
         self._is_hovered = False
         super().__init__(parent)
 
-        self._raised_position = QPoint(0, 0)
-        self.move_animation = QPropertyAnimation(self, b"raised_position", self)
+        self.anchor = 0
+        self.move_animation = QPropertyAnimation(self, b"pos", self)
         self.move_animation.setEasingCurve(QEasingCurve.OutElastic)
         self.move_animation.setDuration(400)
 
-        # I haven't created the property for this animation yet.
-        # self.animation2 = QPropertyAnimation(self, b"lowered_position", self)
-        # self.animation2.setEasingCurve(QEasingCurve.InBounce)
-        # self.animation2.setDuration(100)
-        # self.animation2.setEndValue(1000)
+        self.animation2 = QPropertyAnimation(self, b"pos", self)
+        self.animation2.setEasingCurve(QEasingCurve.InBounce)
+        self.animation2.setDuration(400)
 
         self.animations_group = QSequentialAnimationGroup(self)
         self.animations_group.addAnimation(self.move_animation)
-        # self.animations_group.addAnimation(self.animation2)
+        self.animations_group.addAnimation(self.animation2)
 
         self.setObjectName("summaryCard")
 
@@ -73,18 +80,23 @@ class SummaryCardWidget(QFrame):
 
     def start_animation(self):
         self.animations_group.stop()
-        # FIXME: figure out why this bugs out on window resizes.
-        if self._is_hovered:
-            self.move_animation.setEndValue(QPoint(self.x(), -10))
+        # The second condition is there to prevent widgets from
+        # moving out of place because
+        # of rapidly repeating animations, Trust me; it's seriously annoying...
+        if (
+            self._is_hovered
+            and self.move_animation.state() != QAbstractAnimation.Running
+        ):
+            self.move_animation.setEndValue(QPoint(self.x(), self.y() - 10))
         else:
-            self.move_animation.setEndValue(QPoint(self.x(), 0))
-        self.update()
+            self.move_animation.setEndValue(self.anchor)
+
         self.animations_group.start()
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         print("yadiel")
-        print(self._raised_position)
+        print(self.pos())
 
         painter.setPen("blue")
         painter.drawRect(self.contentsRect())
@@ -98,13 +110,23 @@ class SummaryCardWidget(QFrame):
         self._is_hovered = False
         self.start_animation()
 
-    @PySide6.QtCore.Property(QPoint)
-    def raised_position(self):
-        return self._raised_position
+    def read_anchor(self):
+        return self.anchor
 
-    @raised_position.setter
-    def raised_position(self, pos: QPoint):
-        if pos != self._raised_position:
-            self._raised_position = pos
-            self.move(pos)
-            self.update()
+    def set_anchor(self, value: QPoint):
+        self.anchor = value
+
+    anchor_property = Property(QPoint, read_anchor, set_anchor)
+
+
+if __name__ == "__main__":
+    import sys
+
+    app = QApplication(sys.argv)
+    summary_card_widget = SummaryCardWidget("no", "200")
+    widget = QWidget()
+    widget.setLayout(QHBoxLayout())
+    widget.layout().addWidget(summary_card_widget)
+    summary_card_widget.anchor = summary_card_widget.pos()
+    widget.show()
+    app.exec()
