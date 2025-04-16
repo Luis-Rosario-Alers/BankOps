@@ -7,7 +7,7 @@ from PySide6.QtCore import (
     QPropertyAnimation,
     QSequentialAnimationGroup,
 )
-from PySide6.QtGui import QFont, QPainter
+from PySide6.QtGui import QFont, QPainter, QResizeEvent
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -19,23 +19,21 @@ from PySide6.QtWidgets import (
 
 
 class SummaryCardWidget(QFrame):
+    """Card widget for displaying a summary value with animation."""
 
     def __init__(self, title, value, is_positive=True, parent=None):
+        """Initialize the summary card with title, value, and color."""
         self._is_hovered = False
         super().__init__(parent)
 
         self.anchor = 0
-        self.move_animation = QPropertyAnimation(self, b"pos", self)
-        self.move_animation.setEasingCurve(QEasingCurve.OutElastic)
-        self.move_animation.setDuration(400)
 
-        self.animation2 = QPropertyAnimation(self, b"pos", self)
-        self.animation2.setEasingCurve(QEasingCurve.InBounce)
-        self.animation2.setDuration(400)
+        self.hover_animation = QPropertyAnimation(self, b"pos", self)
+        self.hover_animation.setEasingCurve(QEasingCurve.OutElastic)
+        self.hover_animation.setDuration(400)
 
         self.animations_group = QSequentialAnimationGroup(self)
-        self.animations_group.addAnimation(self.move_animation)
-        self.animations_group.addAnimation(self.animation2)
+        self.animations_group.addAnimation(self.hover_animation)
 
         self.setObjectName("summaryCard")
 
@@ -78,48 +76,73 @@ class SummaryCardWidget(QFrame):
         main_layout.addLayout(value_layout)
         main_layout.addStretch()
 
-    def start_animation(self):
+    def start_hover_animation(self):
+        """Trigger hover animation based on hover state."""
         self.animations_group.stop()
-        # The second condition is there to prevent widgets from
-        # moving out of place because
-        # of rapidly repeating animations, Trust me; it's seriously annoying...
-        if (
-            self._is_hovered
-            and self.move_animation.state() != QAbstractAnimation.Running
-        ):
-            self.move_animation.setEndValue(QPoint(self.x(), self.y() - 10))
+        if self._is_hovered:
+            self.hover_animation.setEndValue(QPoint(self.x(), self.y() - 10))
         else:
-            self.move_animation.setEndValue(self.anchor)
+            self.hover_animation.setEndValue(self.anchor)
 
         self.animations_group.start()
 
     def paintEvent(self, event) -> None:
+        """Custom paint event for the card."""
         painter = QPainter(self)
-        print("yadiel")
-        print(self.pos())
 
+        # TODO: Make the paint event less boring
         painter.setPen("blue")
         painter.drawRect(self.contentsRect())
         painter.end()
 
     def enterEvent(self, event: QEvent):
+        """Handle mouse enter event (start hover animation)."""
         self._is_hovered = True
-        self.start_animation()
+        self.start_hover_animation()
 
     def leaveEvent(self, event: QEvent):
+        """Handle mouse leave event (reverse hover animation)."""
         self._is_hovered = False
-        self.start_animation()
+        self.start_hover_animation()
 
-    def read_anchor(self):
+    def showEvent(self, event):
+        """Set anchor position when widget is shown."""
+        super().showEvent(event)
+        # this is needed to set the anchor position as soon the widget
+        # is shown to the user.
+
+        if not hasattr(self, "_anchor_set") or not self._anchor_set:
+            self.anchor = self.pos()
+            self._anchor_set = True
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        """Update anchor and stop animation on resize."""
+        super().resizeEvent(event)
+        # Stop the animations group BEFORE a resize
+        # as this prevents the anchor from accidentally
+        # anchoring to different position than the layout
+        # calculated one.
+        self.animations_group.stop()
+        self.set_anchor(self.pos())
+
+    @Property(QPoint)
+    def get_anchor(self):
+        """Get the anchor position."""
         return self.anchor
 
-    def set_anchor(self, value: QPoint):
-        self.anchor = value
-
-    anchor_property = Property(QPoint, read_anchor, set_anchor)
+    def set_anchor(self, new_position):
+        """Set anchor position if not animating."""
+        # this is to avoid anchor misplacement because of animations.
+        if self.animations_group.state() != QAbstractAnimation.Running:
+            self.anchor = new_position
+            print(f"Anchor updated to: {new_position}")
+            return
+        else:
+            print(f"{self.animations_group.state()}, ignoring anchor update.")
 
 
 if __name__ == "__main__":
+    """Run a demo of the SummaryCardWidget."""
     import sys
 
     app = QApplication(sys.argv)
@@ -127,6 +150,5 @@ if __name__ == "__main__":
     widget = QWidget()
     widget.setLayout(QHBoxLayout())
     widget.layout().addWidget(summary_card_widget)
-    summary_card_widget.anchor = summary_card_widget.pos()
     widget.show()
     app.exec()
