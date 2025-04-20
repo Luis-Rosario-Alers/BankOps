@@ -1,5 +1,5 @@
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QHBoxLayout, QMainWindow
+from PySide6.QtWidgets import QHBoxLayout, QMainWindow, QVBoxLayout
 
 from src.ui.generated.main_window_ui import Ui_MainWindow
 from src.ui.plugins.widgets.account_card_widget import AccountCardWidget
@@ -21,7 +21,6 @@ class main_window_view(Ui_MainWindow, QMainWindow):
         :return: None
         """
         layout = QHBoxLayout(self.widget_8)
-        layout.setContentsMargins(5, 5, 5, 5)
         number_of_cards = 3
 
         for i in range(number_of_cards):
@@ -41,8 +40,7 @@ class main_window_view(Ui_MainWindow, QMainWindow):
         This method is a work in progress...
         :return: None
         """
-        layout = QHBoxLayout(self.widget_15)
-        layout.setContentsMargins(5, 5, 5, 5)
+        layout = QVBoxLayout(self.widget_15)
 
         for _ in range(number_of_accounts):
             layout.addWidget(
