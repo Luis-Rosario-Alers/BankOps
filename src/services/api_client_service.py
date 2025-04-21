@@ -95,7 +95,23 @@ class APIClient(metaclass=SingletonMeta):
             timeout=self.timeout,
         )
 
-        if results.status_code == 201:
-            return results.json()
-        else:
-            return results.json()
+        return results.json()
+
+    def retrieve_user_transactions(
+        self, limit=30, offset=0, transaction_type=None, account_number=None
+    ) -> dict:
+        url: str = f"{self.base_url}/transactions"
+
+        results = requests.get(
+            url=url,
+            headers=self.headers,
+            timeout=self.timeout,
+            json={
+                "limit": limit,
+                "offset": offset,
+                "transaction_type": transaction_type,
+                "account_number": account_number,
+            },
+        )
+
+        return results.json()

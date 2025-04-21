@@ -1,9 +1,15 @@
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QHBoxLayout, QMainWindow, QVBoxLayout
 
+from src.services.api_client_service import APIClient
 from src.ui.generated.main_window_ui import Ui_MainWindow
 from src.ui.plugins.widgets.account_card_widget import AccountCardWidget
 from src.ui.plugins.widgets.summary_card_widget import SummaryCardWidget
+from src.ui.plugins.widgets.transaction_table_widget import (
+    Transaction,
+    TransactionTableModel,
+    TransactionTableWidget,
+)
 
 
 class main_window_view(Ui_MainWindow, QMainWindow):
@@ -55,9 +61,36 @@ class main_window_view(Ui_MainWindow, QMainWindow):
 
         self._account_cards_added = True
 
+    def addTransactionTable(self):
+        layout = QHBoxLayout(self.widget_17)
+        try:
+            api_client = APIClient()
+
+            transactions = api_client.retrieve_user_transactions()
+
+            transactions_list = []
+
+            for transaction in transactions.get("transactions"):
+                transaction_obj = Transaction(
+                    transaction.get("amount"),
+                    str(transaction.get("timestamp")),
+                    "placeholder",
+                    transaction.get("balance_after"),
+                    transaction.get("status"),
+                )
+                transactions_list.append(transaction_obj)
+
+            model = TransactionTableModel(transactions_list)
+
+            table_view = TransactionTableWidget(model)
+            layout.addWidget(table_view)
+        except Exception as e:
+            print(e)
+
     def showEvent(self, event):
         super().showEvent(event)
         if not self._summary_cards_added:
             self.addSummaryCards()
         if not self._account_cards_added:
             self.addAccountCards(3)
+        self.addTransactionTable()
