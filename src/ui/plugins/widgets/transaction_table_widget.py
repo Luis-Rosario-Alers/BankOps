@@ -37,9 +37,13 @@ class TransactionTableWidget(QTableView):
     def __init__(self, model):
         super().__init__()
         self.setModel(model)
-        self.resizeColumnsToContents()
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
 
 
 if __name__ == "__main__":

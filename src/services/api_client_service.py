@@ -115,3 +115,22 @@ class APIClient(metaclass=SingletonMeta):
         )
 
         return results.json()
+
+    def get_account_details(self, account_number, *args):
+        """
+        fetches account details with optional filtering.
+        :param account_number: number associated with an account
+        :param args: optional arguments to filter the response
+        :return:
+        """
+        url = f"{self.base_url}accounts/{account_number}"
+
+        results = requests.get(url=url, headers=self.headers, timeout=self.timeout)
+
+        if args:
+            filtered_results = {}
+            for key in results.json().values():
+                if key in args:
+                    filtered_results[key] = results.json()[key]
+
+        return results.json()

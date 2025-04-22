@@ -39,7 +39,7 @@ class main_window_view(Ui_MainWindow, QMainWindow):
             layout.addWidget(
                 SummaryCardWidget(
                     parent=layout.parent(),
-                    title=f"Card {i+1}",
+                    title=f"Card {i + 1}",
                     is_positive=True,
                     value="200",
                 )
@@ -79,10 +79,14 @@ class main_window_view(Ui_MainWindow, QMainWindow):
             transactions_list = []
 
             for transaction in transactions.get("transactions"):
+                associated_account_name = api_client.get_account_details(
+                    transaction.get("account_from"), "account_name"
+                ).get("account_name")
                 transaction_obj = Transaction(
                     transaction.get("amount"),
                     str(transaction.get("timestamp")),
-                    "placeholder",
+                    associated_account_name,
+                    # TODO: find way to identify account in transaction.
                     transaction.get("balance_after"),
                     transaction.get("status"),
                 )
