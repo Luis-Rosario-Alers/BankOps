@@ -129,8 +129,10 @@ class APIClient(metaclass=SingletonMeta):
 
         if args:
             filtered_results = {}
-            for key in results.json().values():
+            # I know it's cooked, it's a dict inside a dict lol.
+            for key in results.json().get("account").keys():
                 if key in args:
-                    filtered_results[key] = results.json()[key]
+                    filtered_results[key] = results.json().get("account")[key]
+            return filtered_results
 
         return results.json()
