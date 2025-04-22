@@ -82,7 +82,7 @@ def main() -> int | None:
     logger = setup_logging()
 
     try:
-        # Create and start application
+        # Create and start the application
         app_manager = ApplicationManager()
         app_manager.start()
 

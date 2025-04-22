@@ -106,7 +106,7 @@ class SummaryCardWidget(QFrame):
         self.start_hover_animation()
 
     def showEvent(self, event):
-        """Set anchor position when widget is shown."""
+        """Set the anchor position when the widget is shown."""
         super().showEvent(event)
         # this is needed to set the anchor position as soon the widget
         # is shown to the user.
@@ -120,8 +120,7 @@ class SummaryCardWidget(QFrame):
         super().resizeEvent(event)
         # Stop the animations group BEFORE a resize
         # as this prevents the anchor from accidentally
-        # anchoring to different position than the layout
-        # calculated one.
+        # anchoring to a different position than the layout-calculated one.
         self.animations_group.stop()
         self.set_anchor(self.pos())
 
@@ -131,14 +130,15 @@ class SummaryCardWidget(QFrame):
         return self.anchor
 
     def set_anchor(self, new_position):
-        """Set anchor position if not animating."""
+        """Set the anchor position if not animating."""
         # this is to avoid anchor misplacement because of animations.
         if self.animations_group.state() != QAbstractAnimation.Running:
             self.anchor = new_position
-            print(f"Anchor updated to: {new_position}")
+            # print(f"Anchor updated to: {new_position}")
             return
         else:
-            print(f"{self.animations_group.state()}, ignoring anchor update.")
+            pass
+            # print(f"{self.animations_group.state()}, ignoring anchor update.")
 
 
 if __name__ == "__main__":
