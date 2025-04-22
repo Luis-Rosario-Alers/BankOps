@@ -1,7 +1,7 @@
 from typing import List
 
 from PySide6.QtGui import QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import QAbstractItemView, QApplication, QTableView
+from PySide6.QtWidgets import QAbstractItemView, QApplication, QSizePolicy, QTableView
 
 
 class Transaction:
@@ -39,6 +39,7 @@ class TransactionTableWidget(QTableView):
         self.setModel(model)
         self.resizeColumnsToContents()
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
 
 if __name__ == "__main__":

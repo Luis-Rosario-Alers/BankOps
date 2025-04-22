@@ -100,7 +100,7 @@ class APIClient(metaclass=SingletonMeta):
     def retrieve_user_transactions(
         self, limit=30, offset=0, transaction_type=None, account_number=None
     ) -> dict:
-        url: str = f"{self.base_url}/transactions"
+        url: str = f"{self.base_url}transactions"
 
         results = requests.get(
             url=url,

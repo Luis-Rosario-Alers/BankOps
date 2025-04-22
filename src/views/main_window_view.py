@@ -18,6 +18,11 @@ class main_window_view(Ui_MainWindow, QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        # this is because it needs to match the maximum size of
+        # the account card widget, so that it can stay consistent UI wise.
+        self.widget_9.setMaximumWidth(500)
+        # same thing for this widget as it holds the transaction summary widget.
+        self.widget_10.setMaximumWidth(500)
         self._summary_cards_added = False
         self._account_cards_added = False
 
