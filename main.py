@@ -68,11 +68,13 @@ class ApplicationManager(QObject):
     def on_login_successful(self, user_data: dict) -> None:
         """Handle successful login"""
         self.logger.info(
-            f"User logged in: {user_data.get('user').get('username', 'Unknown')}"
+            f"User logged in: "
+            f"{user_data.get('user_profile').get('username', 'Unknown')}"
         )
 
         self.login_view.hide()
 
+        self.main_window.cached_user_info = user_data
         self.main_window.show()
 
 

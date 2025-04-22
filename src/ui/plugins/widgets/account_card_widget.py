@@ -31,7 +31,7 @@ class AccountCardWidget(QFrame):
         self.balance = balance
         self.account_type = account_type
         self.account_number = account_number
-        self.recent_change = recent_change
+        self.recent_change = float(recent_change)
 
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Raised)

@@ -43,7 +43,7 @@ class APIClient(metaclass=SingletonMeta):
         else:
             return results.json()
 
-    def retrieve_user_info(self) -> dict[str, dict] | None:
+    def retrieve_user_info(self):
         """
         Send a request to retrieve user information.
         :return: Logged-in user account info
@@ -70,8 +70,8 @@ class APIClient(metaclass=SingletonMeta):
             )
             if user_accounts_info.status_code == 200:
                 return {
-                    "user": user_profile_response.json().get("user"),
-                    "accounts": user_accounts_info.json(),
+                    "user_profile": user_profile_response.json().get("user"),
+                    "user_accounts": user_accounts_info.json(),
                 }
 
         # if the request was not successful, raise an exception

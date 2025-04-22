@@ -25,6 +25,7 @@ class main_window_view(Ui_MainWindow, QMainWindow):
         self.widget_10.setMaximumWidth(500)
         self._summary_cards_added = False
         self._account_cards_added = False
+        self.cached_user_info = None
 
     def addSummaryCards(self):
         """
@@ -45,7 +46,7 @@ class main_window_view(Ui_MainWindow, QMainWindow):
             )
         self._summary_cards_added = True
 
-    def addAccountCards(self, number_of_accounts):
+    def addAccountCards(self):
         """
         This method adds the account cards to the dashboard.
         This method is a work in progress...
@@ -53,14 +54,16 @@ class main_window_view(Ui_MainWindow, QMainWindow):
         """
         layout = QVBoxLayout(self.widget_15)
 
-        for _ in range(number_of_accounts):
+        # I know it looks weird, but this is because
+        # of the way that the user_info data is set up.
+        for account in self.cached_user_info.get("user_accounts").get("accounts"):
             layout.addWidget(
                 AccountCardWidget(
-                    name="Steve Checking",
-                    balance=100,
-                    account_type="Checking",
-                    account_number=1234567890,
-                    recent_change=200,
+                    name=account.get("account_name"),
+                    balance=account.get("balance"),
+                    account_type=account.get("account_type"),
+                    account_number=account.get("account_number"),
+                    recent_change=account.get("latest_balance_change"),
                 )
             )
 
@@ -92,10 +95,13 @@ class main_window_view(Ui_MainWindow, QMainWindow):
         except Exception as e:
             print(e)
 
+    def initialize_dashboard(self):
+        pass
+
     def showEvent(self, event):
         super().showEvent(event)
         if not self._summary_cards_added:
             self.addSummaryCards()
         if not self._account_cards_added:
-            self.addAccountCards(3)
+            self.addAccountCards()
         self.addTransactionTable()
