@@ -77,7 +77,7 @@ class AccountCardWidget(QFrame):
         self.balanceLabel.setFont(balance_font)
         self.balanceLabel.setStyleSheet("color: #000000;")
 
-        # check if its positive, negative, or 0
+        # check if it's positive, negative, or 0
         if self.recent_change > 0:
             self.recent_change_text = f"+{str(self.recent_change)}"
             self.recent_change_text_color = "#43A047"

@@ -73,7 +73,6 @@ class ApplicationManager(QObject):
         )
 
         self.login_view.hide()
-
         self.main_window.cached_user_info = user_data
         self.main_window.show()
 

@@ -22,8 +22,8 @@ class APIClient(metaclass=SingletonMeta):
     def login(self, username: str, password: str):
         """
         Send a login request to the API.
-        :param username: Username for user account
-        :param password: password for a user account
+        :param username: Username of the user account
+        :param password: Password of the user account
         :return: user login details
         """
 

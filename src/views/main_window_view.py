@@ -19,13 +19,14 @@ class main_window_view(Ui_MainWindow, QMainWindow):
         super().__init__(parent)
         self.setupUi(self)
         # this is because it needs to match the maximum size of
-        # the account card widget, so that it can stay consistent UI wise.
+        # the account card widget so that it can stay consistent UI wise.
         self.widget_9.setMaximumWidth(500)
-        # same thing for this widget as it holds the transaction summary widget.
+        # the same thing for this widget as it holds the transaction summary widget.
         self.widget_10.setMaximumWidth(500)
         self._summary_cards_added = False
         self._account_cards_added = False
         self.cached_user_info = None
+        self.api_client = APIClient()
 
     def addSummaryCards(self):
         """
@@ -72,16 +73,16 @@ class main_window_view(Ui_MainWindow, QMainWindow):
     def addTransactionTable(self):
         layout = QHBoxLayout(self.widget_17)
         try:
-            api_client = APIClient()
-
-            transactions = api_client.retrieve_user_transactions()
+            transactions = self.api_client.retrieve_user_transactions()
 
             transactions_list = []
 
             for transaction in transactions.get("transactions"):
-                associated_account_name = api_client.get_account_details(
+
+                associated_account_name = self.api_client.get_account_details(
                     transaction.get("account_from"), "account_name"
                 ).get("account_name")
+
                 transaction_obj = Transaction(
                     transaction.get("amount"),
                     str(transaction.get("timestamp")),

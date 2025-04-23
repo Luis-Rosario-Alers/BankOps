@@ -26,6 +26,8 @@ class LoginModel(BaseController):
                 # Handle invalid credentials
                 error_message = login_response.get("error", "Unknown error occurred.")
                 self.login_view.show_failure(error_message)
+                return None
         except Exception as e:
             # Handle any exceptions that occur during the login process
             self.login_view.show_failure(f"An error occurred: {str(e)}")
+            return None
