@@ -2,7 +2,7 @@ from PySide6.QtCore import QRect
 from PySide6.QtGui import QColor, QPainter, QPixmap, QRegion
 from PySide6.QtWidgets import QMenu, QPushButton
 
-from src.ui.plugins import resources_rc  # noqa
+from src.ui.plugins.resources import resources_rc  # noqa
 
 
 class QProfileButton(QPushButton):

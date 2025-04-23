@@ -22,8 +22,8 @@ class APIClient(metaclass=SingletonMeta):
     def login(self, username: str, password: str):
         """
         Send a login request to the API.
-        :param username: Username for user account
-        :param password: password for a user account
+        :param username: Username of the user account
+        :param password: Password of the user account
         :return: user login details
         """
 
@@ -43,7 +43,7 @@ class APIClient(metaclass=SingletonMeta):
         else:
             return results.json()
 
-    def retrieve_user_info(self) -> dict[str, dict] | None:
+    def retrieve_user_info(self):
         """
         Send a request to retrieve user information.
         :return: Logged-in user account info
@@ -70,8 +70,8 @@ class APIClient(metaclass=SingletonMeta):
             )
             if user_accounts_info.status_code == 200:
                 return {
-                    "user": user_profile_response.json().get("user"),
-                    "accounts": user_accounts_info.json(),
+                    "user_profile": user_profile_response.json().get("user"),
+                    "user_accounts": user_accounts_info.json(),
                 }
 
         # if the request was not successful, raise an exception
@@ -95,7 +95,45 @@ class APIClient(metaclass=SingletonMeta):
             timeout=self.timeout,
         )
 
-        if results.status_code == 201:
-            return results.json()
-        else:
-            return results.json()
+        return results.json()
+
+    def retrieve_user_transactions(
+        self, limit=30, offset=0, transaction_type=None, account_number=None
+    ) -> dict:
+        url: str = f"{self.base_url}transactions"
+
+        results = requests.get(
+            url=url,
+            headers=self.headers,
+            timeout=self.timeout,
+            json={
+                "limit": limit,
+                "offset": offset,
+                "transaction_type": transaction_type,
+                "account_number": account_number,
+            },
+        )
+
+        return results.json()
+
+    def get_account_details(self, account_number, *args):
+        """
+        fetches account details with optional filtering.
+        :param account_number: number associated with an account
+        :param args: optional arguments to filter the response
+        :return:
+        """
+        url = f"{self.base_url}accounts/{account_number}"
+
+        results = requests.get(url=url, headers=self.headers, timeout=self.timeout)
+
+        if args:
+            filtered_results = {}
+            # I know it's cooked, it's a dict inside a dict lol.
+            parsed_json = results.json()
+            for key in parsed_json.get("account").keys():
+                if key in args:
+                    filtered_results[key] = parsed_json.get("account")[key]
+            return filtered_results
+
+        return results.json()

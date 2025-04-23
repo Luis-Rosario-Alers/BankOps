@@ -3,12 +3,12 @@ import os
 import sys
 from datetime import datetime
 
-from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import QObject, Slot
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from src.models.login_model import LoginModel
 from src.views.login_view import LoginView
-from src.views.main_window import main_window
+from src.views.main_window_view import main_window_view
 
 
 def setup_logging():
@@ -35,22 +35,19 @@ def setup_logging():
 class ApplicationManager(QObject):
     """Manages the life cycle of the application"""
 
-    shutdown_requested = Signal()
-
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger("app")
         self.app = QApplication(sys.argv)
         self.login_view = LoginView(model=None)
         self.login_model = LoginModel(login_view=self.login_view)
-        self.main_window = main_window()
+        self.main_window = main_window_view()
         self.__connect_signals()
         self.logger.info("ApplicationManager initialized")
 
     def __connect_signals(self):
         """Connects signals to slots"""
         self.login_model.login_successful.connect(self.on_login_successful)
-        self.shutdown_requested.connect(self.shutdown)
 
     def start(self):
         """Initialize and start the application"""
@@ -71,53 +68,20 @@ class ApplicationManager(QObject):
     def on_login_successful(self, user_data: dict) -> None:
         """Handle successful login"""
         self.logger.info(
-            f"User logged in: {user_data.get('user').get('username', 'Unknown')}"
+            f"User logged in: "
+            f"{user_data.get('user_profile').get('username', 'Unknown')}"
         )
 
-        # Hide the login window
         self.login_view.hide()
-
-        # Show the main application window
-        self.show_main_window(user_data)
-
-    @Slot()
-    def shutdown(self) -> None:
-        """Clean shutdown of the application"""
-
-        # seems redundant, but this is just incase we need to
-        # perform some cleanup before quitting
-
-        self.logger.info("Application shutting down")
-
-        # Close windows
-        if self.login_view:
-            self.login_view.close()
-
-        if self.main_window:
-            self.main_window.close()
-
-        self.app.quit()
-
-    def show_main_window(self, user_data: dict):
-        """Show the main application window"""
-        # Placeholder for the main window logic
-        self.logger.info("Main window would be shown here")
-
+        self.main_window.cached_user_info = user_data
         self.main_window.show()
-
-        QMessageBox.information(
-            None,
-            "Login Successful",
-            f"Welcome {user_data.get('username', 'User')}!\n"
-            f"Main application window would open here.",
-        )
 
 
 def main() -> int | None:
     logger = setup_logging()
 
     try:
-        # Create and start application
+        # Create and start the application
         app_manager = ApplicationManager()
         app_manager.start()
 
