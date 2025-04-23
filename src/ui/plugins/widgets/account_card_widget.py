@@ -27,6 +27,7 @@ class AccountCardWidget(QFrame):
         self, name, balance, account_type, account_number, recent_change, parent=None
     ):
         super().__init__()
+        self._is_hovered = False
         self.name = name
         self.balance = balance
         self.account_type = account_type
