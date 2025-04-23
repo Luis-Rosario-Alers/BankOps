@@ -51,13 +51,13 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     example_transaction0 = Transaction(
-        100, "3/5/2025", "Yadiel is my son", 400, "COMPLETED"
+        100, "3/5/2025", "Example Account", 400, "COMPLETED"
     )
     example_transaction1 = Transaction(
-        100, "3/5/2025", "Yadiel is my son", 400, "COMPLETED"
+        100, "3/5/2025", "Example Account", 400, "COMPLETED"
     )
     example_transaction2 = Transaction(
-        100, "3/5/2025", "Yadiel is my son", 400, "COMPLETED"
+        100, "3/5/2025", "Example Account", 400, "COMPLETED"
     )
     model = TransactionTableModel(
         [example_transaction0, example_transaction1, example_transaction2]
