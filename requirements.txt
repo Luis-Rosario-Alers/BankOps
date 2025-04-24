@@ -4,4 +4,5 @@ pre-commit
 pyinstaller
 PySide6~=6.9.0
 pytest~=8.3.5
+pytest-qt~=4.4.0
 requests~=2.32.3

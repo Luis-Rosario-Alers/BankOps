@@ -8,8 +8,8 @@ class LoginView(QMainWindow, Ui_login_window):
     def __init__(self, model):
         super().__init__()
         self.setupUi(self)
-        self.model = model
         self.__connect_signals()
+        self.model = model
 
     def __connect_signals(self):
         self.authenticatePushButton.clicked.connect(self.on_authenticate_button_clicked)

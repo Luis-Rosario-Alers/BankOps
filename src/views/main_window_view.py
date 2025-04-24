@@ -78,7 +78,6 @@ class main_window_view(Ui_MainWindow, QMainWindow):
             transactions_list = []
 
             for transaction in transactions.get("transactions"):
-
                 associated_account_name = self.api_client.get_account_details(
                     transaction.get("account_from"), "account_name"
                 ).get("account_name")
