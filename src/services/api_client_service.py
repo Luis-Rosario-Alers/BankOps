@@ -41,6 +41,7 @@ class APIClient(metaclass=SingletonMeta):
             self.headers["Authorization"] = f"Bearer {self.token}"
             return results.json()
         else:
+            self.token = None
             return results.json()
 
     def retrieve_user_info(self):
