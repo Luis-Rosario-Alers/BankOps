@@ -1,6 +1,7 @@
 import requests
 
 from src import SingletonMeta
+from src.services.session_manager import get_token
 
 
 class APIClient(metaclass=SingletonMeta):
@@ -10,7 +11,7 @@ class APIClient(metaclass=SingletonMeta):
 
     def __init__(self):
         """Initialize the API client with default values."""
-        self.token = None
+        self.token = get_token()
         self.base_url = " http://127.0.0.1:5000/api/v1/"
         self.headers = {
             "Content-Type": "application/json",
@@ -37,6 +38,8 @@ class APIClient(metaclass=SingletonMeta):
         )
 
         if results.status_code == 201:
+            # Set access token in system keyring
+            # TODO: add keyring save here
             self.token = results.json().get("access_token")
             self.headers["Authorization"] = f"Bearer {self.token}"
             return results.json()
@@ -138,3 +141,15 @@ class APIClient(metaclass=SingletonMeta):
             return filtered_results
 
         return results.json()
+
+    def refresh_token(self):
+        """Attempts to renew the access token."""
+        url = f"{self.base_url}auth/sessions/renew"
+        results = requests.post(
+            url=url,
+            headers=self.headers,
+            timeout=self.timeout,
+        )
+        if results.status_code == 201:
+            self.token = results.json().get("access_token")
+            self.headers["Authorization"] = f"Bearer {self.token}"

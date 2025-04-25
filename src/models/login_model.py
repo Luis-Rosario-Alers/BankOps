@@ -17,7 +17,7 @@ class LoginModel(BaseController):
     def process_login(self, username: str, password: str, api_client):
         login_response: dict = api_client.login(username, password)
         try:
-            # this ensures we get an auth token back from the server.
+            # this ensures we get an auth access_token back from the server.
             if login_response.get("access_token"):
                 user_data = api_client.retrieve_user_info()
                 self.login_successful.emit(user_data)

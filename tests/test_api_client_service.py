@@ -37,7 +37,7 @@ class TestAPIClient:
             yield mock_get
 
     def set_authenticated_state(self, client, token="test_token"):
-        """Helper to set the token and header for tests requiring auth."""
+        """Helper to set the access_token and header for tests requiring auth."""
         client.token = token
         client.headers["Authorization"] = f"Bearer {token}"
 
@@ -238,9 +238,9 @@ class TestAPIClient:
         result = api_client.create_user(email, username, password)
 
         # Assert
-        # Use client's initial headers (no auth token expected)
+        # Use client's initial headers (no auth access_token expected)
         initial_headers = api_client.headers.copy()
-        initial_headers["Authorization"] = None  # Ensure no auth token
+        initial_headers["Authorization"] = None  # Ensure no auth access_token
 
         mock_requests_post.assert_called_once_with(
             url=USERS_URL,
