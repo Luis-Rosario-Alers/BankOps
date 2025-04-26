@@ -4,12 +4,10 @@ from datetime import datetime, timezone
 import keyring
 import requests
 
-from src import SingletonMeta
-
 logger = logging.getLogger(__name__)
 
 
-class SessionManager(metaclass=SingletonMeta):
+class SessionManager:
     """Manages JWT methods and processes."""
 
     def __init__(self):
@@ -24,7 +22,7 @@ class SessionManager(metaclass=SingletonMeta):
 
     def _get_current_auth_header(self) -> dict:
         """Helper to get the current Authorization header"""
-        if self.access_token:
+        if self.access_token != "None" and self.access_token is not None:  # nosec
             return {"Authorization": f"Bearer {self.access_token}"}
         return {}
 
@@ -59,14 +57,14 @@ class SessionManager(metaclass=SingletonMeta):
 
         logger.info("JWT access_token and refresh_token stored successfully.")
 
-    @staticmethod
-    def get_access_token() -> str | None:
+    def get_access_token(self) -> str | None:
         """Retrieves the JWT access_token."""
-        return keyring.get_password("BankOpsBanking", "access_token")
+        self.access_token = keyring.get_password("BankOpsBanking", "access_token")
+        return self.access_token
 
-    @staticmethod
-    def get_refresh_token():
-        return keyring.get_password("BankOpsBanking", "refresh_token")
+    def get_refresh_token(self):
+        self.refresh_token = keyring.get_password("BankOpsBanking", "refresh_token")
+        return self.refresh_token
 
     def clear_tokens(self) -> None:
         """Clears the stored JWT access_token."""
@@ -74,6 +72,8 @@ class SessionManager(metaclass=SingletonMeta):
         keyring.delete_password("BankOpsBanking", "refresh_token")
         keyring.delete_password("BankOpsBanking", "access_token_expire_time")
         keyring.delete_password("BankOpsBanking", "refresh_token_expire_time")
+        # TODO: find a way to not accidentally clear other
+        #  tokens that are not necessary.
 
         self.access_token = None
         self.refresh_token = None
@@ -117,7 +117,7 @@ class SessionManager(metaclass=SingletonMeta):
         }
 
         try:
-            results = requests.get(
+            results = requests.post(
                 url=url,
                 headers=refresh_headers,
                 timeout=self.timeout,
