@@ -8,12 +8,16 @@ from src.views.login_view import LoginView
 class TestLoginView:
 
     @patch("src.views.login_view.APIClient")
-    def test_on_authenticate_button_clicked(self, mock_api_client_class, qtbot):
+    @patch("src.views.login_view.SessionManager")
+    def test_on_authenticate_button_clicked(
+        self, mock_session_manager_class, mock_api_client_class, qtbot
+    ):
         """Test the behavior of on_authenticate_button_clicked."""
 
         mock_model = MagicMock()
 
         mock_api_client_instance = mock_api_client_class.return_value
+        mock_session_manager_instance = mock_session_manager_class.return_value
 
         mock_view = LoginView(mock_model)
 
@@ -25,7 +29,10 @@ class TestLoginView:
         mock_view.on_authenticate_button_clicked()
 
         mock_model.process_login.assert_called_once_with(
-            "test_user", "test_password", mock_api_client_instance
+            "test_user",
+            "test_password",
+            mock_api_client_instance,
+            mock_session_manager_instance,
         )
 
         mock_view.usernameLineEdit.clear.assert_called_once()
