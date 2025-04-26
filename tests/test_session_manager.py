@@ -62,8 +62,10 @@ class TestSessionManager:
         session_manager.refresh_token = refresh_token
 
     # --- Test _get_current_auth_header ---
-    def test__get_current_auth_header_with_token(self, session_manager):
+    def test__get_current_auth_header_with_token(self, session_manager, mock_keyring):
         # Arrange
+        mock_keyring.get_password.return_value = "valid_token"
+
         self.set_authenticated_state(session_manager, access_token="valid_token")
 
         # Act
@@ -72,9 +74,11 @@ class TestSessionManager:
         # Assert
         assert header == {"Authorization": "Bearer valid_token"}
 
-    def test__get_current_auth_header_without_token(self, session_manager):
+    def test__get_current_auth_header_without_token(
+        self, session_manager, mock_keyring
+    ):
         # Arrange
-        session_manager.access_token = None
+        mock_keyring.get_password.return_value = None
 
         # Act
         header = session_manager._get_current_auth_header()
@@ -109,30 +113,26 @@ class TestSessionManager:
         )  # Order matters here based on implementation
         assert mock_keyring.set_password.call_count == 4
 
-    def test_get_access_token(self, mock_keyring):
+    def test_get_access_token(self, session_manager, mock_keyring):
         # Arrange
         mock_keyring.get_password.return_value = "stored_access_token"
 
         # Act
-        token = SessionManager.get_access_token()
+        token = session_manager.get_access_token()
 
         # Assert
-        mock_keyring.get_password.assert_called_once_with(
-            KEYRING_SERVICE, "access_token"
-        )
+        mock_keyring.get_password.assert_called_with(KEYRING_SERVICE, "access_token")
         assert token == "stored_access_token"
 
-    def test_get_refresh_token(self, mock_keyring):
+    def test_get_refresh_token(self, session_manager, mock_keyring):
         # Arrange
         mock_keyring.get_password.return_value = "stored_refresh_token"
 
         # Act
-        token = SessionManager.get_refresh_token()
+        token = session_manager.get_refresh_token()
 
         # Assert
-        mock_keyring.get_password.assert_called_once_with(
-            KEYRING_SERVICE, "refresh_token"
-        )
+        mock_keyring.get_password.assert_called_with(KEYRING_SERVICE, "refresh_token")
         assert token == "stored_refresh_token"
 
     @patch("src.services.session_manager.logger", autospec=True)
@@ -167,7 +167,7 @@ class TestSessionManager:
         is_expired = session_manager.check_expiration()
 
         # Assert
-        mock_keyring.get_password.assert_called_once_with(
+        mock_keyring.get_password.assert_called_with(
             KEYRING_SERVICE, "access_token_expire_time"
         )
         assert is_expired is True
