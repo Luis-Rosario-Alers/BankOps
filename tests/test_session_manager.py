@@ -220,7 +220,7 @@ class TestSessionManager:
     # --- Test attempt_session_refresh ---
     @patch("src.services.session_manager.datetime", wraps=datetime)
     def test_attempt_session_refresh_success(
-        self, mock_datetime, session_manager, mock_requests_get, mock_keyring
+        self, mock_datetime, session_manager, mock_requests_post, mock_keyring
     ):
         # Arrange
         mock_now = datetime.now(timezone.utc)
@@ -239,14 +239,14 @@ class TestSessionManager:
             "refresh_token": new_refresh,
             "refresh_token_expires_in": refresh_expires_ts,
         }
-        mock_requests_get.return_value = response
+        mock_requests_post.return_value = response
 
         # Act
         result = session_manager.attempt_session_refresh(refresh_token)
 
         # Assert
         assert result is True
-        mock_requests_get.assert_called_once_with(
+        mock_requests_post.assert_called_once_with(
             url=REFRESH_URL,
             headers={
                 "Content-Type": "application/json",
@@ -318,7 +318,7 @@ class TestSessionManager:
         assert session_manager.access_token is None
 
     def test_attempt_session_refresh_missing_access_token_in_response(
-        self, session_manager, mock_requests_get
+        self, session_manager, mock_requests_post
     ):
         # Arrange
         refresh_token = "valid_refresh_token"
@@ -327,7 +327,7 @@ class TestSessionManager:
         response.json.return_value = {
             "message": "Success but no token"
         }  # Missing access_token
-        mock_requests_get.return_value = response
+        mock_requests_post.return_value = response
 
         # Act & Assert
         with pytest.raises(
@@ -338,14 +338,14 @@ class TestSessionManager:
         assert session_manager.access_token is None
 
     def test_attempt_session_refresh_status_code_failure(
-        self, session_manager, mock_requests_get
+        self, session_manager, mock_requests_post
     ):
         # Arrange
         refresh_token = "valid_refresh_token"
         response = MagicMock()
         response.status_code = 404
         response.json.return_value = {"message": "Resource not found."}
-        mock_requests_get.return_value = response
+        mock_requests_post.return_value = response
 
         # Act & Assert
         with pytest.raises(
