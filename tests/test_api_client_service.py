@@ -1,306 +1,434 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-import requests
+from requests import Response
+from requests.exceptions import RequestException
 
-from src.services.api_client_service import APIClient
+from src.services.api_client_service import APIClient, APIClientError, SessionManager
 
-BASE_URL = " http://127.0.0.1:5000/api/v1/"
-LOGIN_URL = f"{BASE_URL}auth/sessions/users"
-USERS_URL = f"{BASE_URL}users"
-CURRENT_USER_URL = f"{USERS_URL}/current"
-TRANSACTIONS_URL = f"{BASE_URL}transactions"
-ACCOUNTS_URL = f"{BASE_URL}accounts"
+BASE_URL = "http://127.0.0.1:5000/api/v1/"
+USERS_URL = "users"
+CURRENT_USER_URL = "users/current"
+TRANSACTIONS_URL = "transactions"
+ACCOUNTS_URL = "accounts"
 DEFAULT_TIMEOUT = 5
 
 
 class TestAPIClient:
     @pytest.fixture
     def api_client(self):
-        client = APIClient()
-        client.base_url = BASE_URL
-
-        yield client
-
-        client.token = None
-        client.headers["Authorization"] = None
-
-    # --- Mock Fixtures ---
-    @pytest.fixture
-    def mock_requests_post(self):
-        with patch("src.services.api_client_service.requests.post") as mock_post:
-            yield mock_post
+        client = APIClient(base_url=BASE_URL, timeout=DEFAULT_TIMEOUT)
+        return client
 
     @pytest.fixture
-    def mock_requests_get(self):
-        with patch("src.services.api_client_service.requests.get") as mock_get:
-            yield mock_get
+    def mock_make_request(self):
+        # Patch the internal _make_request method
+        with patch.object(APIClient, "_make_request", autospec=True) as mock_method:
+            yield mock_method
 
-    def set_authenticated_state(self, client, token="test_token"):
-        """Helper to set the access_token and header for tests requiring auth."""
-        client.token = token
-        client.headers["Authorization"] = f"Bearer {token}"
-
-    # --- Login Tests ---
-    def test_login_success(self, api_client, mock_requests_post):
+    @patch("src.services.api_client_service.requests.request")
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_make_request_authenticated_successful(
+        self, mock_get_headers, mock_request, api_client
+    ):
         # Arrange
-        response = MagicMock()
-        response.status_code = 201
-        response.json.return_value = {"access_token": "test_token"}
-        mock_requests_post.return_value = response
-        username = "test_user"
-        password = "test_password"
+        mock_response = MagicMock(spec=Response)
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"json_data": "test_json"}
+        mock_request.return_value = mock_response
+
+        endpoint = "test_endpoint"
+        method = "GET"
+        authenticated = True
+        expected_headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": "Bearer test_token",
+        }
+        expected_params = {"param1": "value1"}
+        expected_timeout = DEFAULT_TIMEOUT
 
         # Act
-        result = api_client.login(username, password)
+        api_client._make_request(
+            method, endpoint, authenticated, expected_status=200, params=expected_params
+        )
 
         # Assert
-        mock_requests_post.assert_called_once_with(
-            url=LOGIN_URL,
-            json={"username": username, "password": password},
-            headers=api_client.headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_request.assert_called_once_with(
+            method=method,
+            url=f"{BASE_URL}{endpoint}",
+            headers=expected_headers,
+            timeout=expected_timeout,
+            params=expected_params,
         )
-        assert result == {"access_token": "test_token"}
-        assert api_client.token == "test_token"
-        assert api_client.headers["Authorization"] == "Bearer test_token"
 
-    def test_login_failure_invalid_credentials(self, api_client, mock_requests_post):
+    @patch("src.services.api_client_service.requests.request")
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        side_effect=APIClientError("Failed to get authenticated headers"),
+    )
+    def test_make_request_authenticated_headers_failed(
+        self, mock_get_headers, mock_request, api_client
+    ):
         # Arrange
-        response = MagicMock()
-        response.status_code = 401
-        response.json.return_value = {"error": "Invalid Credentials"}
-        mock_requests_post.return_value = response
-        username = "invalid_user"
-        password = "invalid_password"
+        mock_response = MagicMock(spec=Response)
+        mock_response.status_code = 200
+        mock_request.return_value = mock_response
 
-        # Act
-        result = api_client.login(username, password)
-
-        # Assert
-        mock_requests_post.assert_called_once_with(
-            url=LOGIN_URL,
-            json={"username": username, "password": password},
-            headers=api_client.headers,
-            timeout=DEFAULT_TIMEOUT,
-        )
-        assert result == {"error": "Invalid Credentials"}
-        assert api_client.token is None
-        assert api_client.headers["Authorization"] is None
-
-    def test_login_failure_server_error(self, api_client, mock_requests_post):
-        # Arrange
-        response = MagicMock()
-        response.status_code = 500
-        response.json.return_value = {"error": "Internal Server Error"}
-        mock_requests_post.return_value = response
-        username = "test_user"
-        password = "test_password"
-
-        # Act
-        result = api_client.login(username, password)
-
-        # Assert
-        mock_requests_post.assert_called_once_with(
-            url=LOGIN_URL,
-            json={"username": username, "password": password},
-            headers=api_client.headers,
-            timeout=DEFAULT_TIMEOUT,
-        )
-        assert result == {"error": "Internal Server Error"}
-        assert api_client.token is None
-        assert api_client.headers["Authorization"] is None
-
-    def test_login_network_error(self, api_client, mock_requests_post):
-        # Arrange
-        mock_requests_post.side_effect = requests.exceptions.Timeout(
-            "Connection timed out"
-        )
-        username = "test_user"
-        password = "test_password"
+        endpoint = "test_endpoint"
+        method = "GET"
+        authenticated = True
+        expected_params = {"param1": "value1"}
 
         # Act & Assert
-        with pytest.raises(requests.exceptions.Timeout):
-            api_client.login(username, password)
+        with pytest.raises(APIClientError, match="Failed to get authenticated headers"):
+            api_client._make_request(
+                method,
+                endpoint,
+                authenticated,
+                expected_status=200,
+                params=expected_params,
+            )
 
-        assert api_client.token is None
-        assert api_client.headers["Authorization"] is None
+    @patch(
+        "src.services.api_client_service.requests.request",
+        side_effect=RequestException("Request exception"),
+    )
+    @patch.object(SessionManager, "get_authenticated_headers")
+    def test_make_request_requestException(
+        self, mock_get_headers, mock_request, api_client
+    ):
+        # Arrange
+        mock_response = MagicMock(spec=Response)
+        mock_response.status_code = 200
+        mock_request.return_value = mock_response
+
+        endpoint = "test_endpoint"
+        method = "GET"
+        authenticated = True
+        expected_params = {"param1": "value1"}
+
+        # Act & Assert
+        with pytest.raises(APIClientError):
+            api_client._make_request(
+                method,
+                endpoint,
+                authenticated,
+                expected_status=200,
+                params=expected_params,
+            )
+
+    @patch("src.services.api_client_service.requests.request")
+    @patch.object(SessionManager, "get_authenticated_headers")
+    def test_make_request_status_code_check_failure(
+        self, mock_get_headers, mock_request, api_client
+    ):
+        # Arrange
+        mock_response = MagicMock(spec=Response)
+        mock_response.status_code = 400  # Different from the expected status code
+        mock_request.return_value = mock_response
+
+        endpoint = "test_endpoint"
+        method = "GET"
+        authenticated = True
+        expected_params = {"param1": "value1"}
+        expected_status = 200
+
+        # Act & Assert
+        with pytest.raises(APIClientError):
+            api_client._make_request(
+                method,
+                endpoint,
+                authenticated,
+                expected_status=expected_status,
+                params=expected_params,
+            )
+
+    @patch(
+        "src.services.api_client_service.requests.request",
+        side_effect=APIClientError("Random Error"),
+    )
+    @patch.object(SessionManager, "get_authenticated_headers")
+    def test_make_request_handle_api_client_error(
+        self, mock_get_headers, mock_request, api_client
+    ):
+        # Arrange
+        mock_response = MagicMock(spec=Response)
+        mock_response.status_code = 200
+        mock_request.return_value = mock_response
+
+        endpoint = "test_endpoint"
+        method = "GET"
+        authenticated = True
+        expected_params = {"param1": "value1"}
+        expected_status = 200
+
+        # Act & Assert
+        with pytest.raises(APIClientError):
+            api_client._make_request(
+                method,
+                endpoint,
+                authenticated,
+                expected_status=expected_status,
+                params=expected_params,
+            )
 
     # --- Retrieve User Info Tests ---
-    def test_retrieve_user_info_success(self, api_client, mock_requests_get):
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_retrieve_user_info_success(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
         # Arrange
-        self.set_authenticated_state(api_client)  # Set auth state explicitly
-
-        user_profile_response = MagicMock()
+        user_profile_response = MagicMock(spec=Response)
         user_profile_response.status_code = 200
         user_profile_response.json.return_value = {
             "user": {"id": "123", "name": "Test User"}
         }
 
-        user_accounts_response = MagicMock()
+        user_accounts_response = MagicMock(spec=Response)
         user_accounts_response.status_code = 200
         user_accounts_response.json.return_value = {
             "accounts": ["account1", "account2"]
         }
 
-        mock_requests_get.side_effect = [user_profile_response, user_accounts_response]
-        expected_headers = api_client.headers
+        mock_make_request.side_effect = [user_profile_response, user_accounts_response]
 
         # Act
         result = api_client.retrieve_user_info()
 
         # Assert
-        assert mock_requests_get.call_count == 2
-        # Check first call (user profile)
-        mock_requests_get.assert_any_call(
-            url=CURRENT_USER_URL,
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        assert mock_make_request.call_count == 2
+        mock_make_request.assert_any_call(
+            api_client,
+            method="GET",
+            endpoint=CURRENT_USER_URL,
+            authenticated=True,
+            expected_status=200,
         )
-        # Check second call (user accounts)
-        mock_requests_get.assert_any_call(
-            url=f"{USERS_URL}/123/accounts",
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_any_call(
+            api_client,
+            method="GET",
+            endpoint=f"{USERS_URL}/123/accounts",
+            authenticated=True,
+            expected_status=200,
         )
         assert result == {
             "user_profile": {"id": "123", "name": "Test User"},
             "user_accounts": {"accounts": ["account1", "account2"]},
         }
 
-    def test_retrieve_user_info_failure_profile_request(
-        self, api_client, mock_requests_get
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_retrieve_user_info_failure_profile_request_api_error(
+        self, mock_get_headers, api_client, mock_make_request
     ):
         # Arrange
-        self.set_authenticated_state(api_client)
-        user_profile_response = MagicMock()
-        user_profile_response.status_code = 404
-        mock_requests_get.return_value = user_profile_response
-        expected_headers = api_client.headers
+        mock_make_request.side_effect = APIClientError("Failed profile request")
 
         # Act & Assert
         with pytest.raises(
-            Exception, match="Failed to retrieve user information from server"
+            APIClientError,
+            match="Failed to retrieve complete user information: "
+            "Failed profile request",
         ):
             api_client.retrieve_user_info()
 
-        mock_requests_get.assert_called_once_with(
-            url=CURRENT_USER_URL,
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=CURRENT_USER_URL,
+            authenticated=True,
+            expected_status=200,
         )
 
-    def test_retrieve_user_info_failure_accounts_request(
-        self, api_client, mock_requests_get
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_retrieve_user_info_failure_profile_malformed(
+        self, mock_get_headers, api_client, mock_make_request
     ):
         # Arrange
-        self.set_authenticated_state(api_client)
-        user_profile_response = MagicMock()
+        user_profile_response = MagicMock(spec=Response)
+        user_profile_response.status_code = 200
+        user_profile_response.json.return_value = {"not_user": {"id": "123"}}
+        mock_make_request.return_value = user_profile_response
+
+        # Act & Assert
+        with pytest.raises(
+            APIClientError,
+            match="Failed to retrieve complete user information: "
+            "User profile data is missing or malformed",
+        ):
+            api_client.retrieve_user_info()
+
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=CURRENT_USER_URL,
+            authenticated=True,
+            expected_status=200,
+        )
+
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_retrieve_user_info_failure_accounts_request(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
+        # Arrange
+        user_profile_response = MagicMock(spec=Response)
         user_profile_response.status_code = 200
         user_profile_response.json.return_value = {
             "user": {"id": "123", "name": "Test User"}
         }
 
-        user_accounts_response = MagicMock()
-        user_accounts_response.status_code = 500
-
-        mock_requests_get.side_effect = [user_profile_response, user_accounts_response]
-        expected_headers = api_client.headers
+        mock_make_request.side_effect = [
+            user_profile_response,
+            APIClientError("Failed accounts request"),
+        ]
 
         # Act & Assert
         with pytest.raises(
-            Exception, match="Failed to retrieve user information from server"
+            APIClientError,
+            match="Failed to retrieve complete user information: "
+            "Failed accounts request",
         ):
             api_client.retrieve_user_info()
 
-        assert mock_requests_get.call_count == 2
-        mock_requests_get.assert_any_call(
-            url=CURRENT_USER_URL, headers=expected_headers, timeout=DEFAULT_TIMEOUT
+        # Assert
+        assert mock_make_request.call_count == 2
+        mock_make_request.assert_any_call(
+            api_client,
+            method="GET",
+            endpoint=CURRENT_USER_URL,
+            authenticated=True,
+            expected_status=200,
         )
-        mock_requests_get.assert_any_call(
-            url=f"{USERS_URL}/123/accounts",
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_any_call(
+            api_client,
+            method="GET",
+            endpoint=f"{USERS_URL}/123/accounts",
+            authenticated=True,
+            expected_status=200,
         )
 
     # --- Create User Test ---
-    def test_create_user(self, api_client, mock_requests_post):
+    def test_create_user_success(self, api_client, mock_make_request):
         # Arrange
-        response = MagicMock()
+        response = MagicMock(spec=Response)
         response.status_code = 201
         response.json.return_value = {"id": "123", "email": "test@test.com"}
-        mock_requests_post.return_value = response
+        mock_make_request.return_value = response
+
         email = "test@test.com"
         username = "test_user"
         password = "password"
+        expected_payload = {"email": email, "username": username, "password": password}
 
         # Act
         result = api_client.create_user(email, username, password)
 
         # Assert
-        # Use client's initial headers (no auth access_token expected)
-        initial_headers = api_client.headers.copy()
-        initial_headers["Authorization"] = None  # Ensure no auth access_token
-
-        mock_requests_post.assert_called_once_with(
-            url=USERS_URL,
-            json={"email": email, "username": username, "password": password},
-            headers=initial_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="POST",
+            endpoint=USERS_URL,
+            authenticated=False,
+            json=expected_payload,
+            expected_status=201,
         )
         assert result == {"id": "123", "email": "test@test.com"}
-        assert api_client.token is None
 
-    # --- Retrieve User Transactions Tests ---
-    def test_retrieve_user_transactions_default_params(
-        self, api_client, mock_requests_get
-    ):
+    def test_create_user_failure(self, api_client, mock_make_request):
         # Arrange
-        self.set_authenticated_state(api_client)
-        response = MagicMock()
-        response.status_code = 200
-        response.json.return_value = {"transactions": [{"id": 1}, {"id": 2}]}
-        mock_requests_get.return_value = response
-        expected_headers = api_client.headers
+        mock_make_request.side_effect = APIClientError("Creation failed")
+        email = "test@test.com"
+        username = "test_user"
+        password = "password"
+        expected_payload = {"email": email, "username": username, "password": password}
 
-        # Expected JSON payload with defaults for None parameters
-        expected_payload = {
-            "limit": 30,
-            "offset": 0,
-            "transaction_type": None,
-            "account_number": None,
-        }
-
-        # Act
-        result = api_client.retrieve_user_transactions()  # Use defaults
+        # Act & Assert
+        with pytest.raises(
+            APIClientError, match="Failed to create user: Creation failed"
+        ):
+            api_client.create_user(email, username, password)
 
         # Assert
-        mock_requests_get.assert_called_once_with(
-            url=TRANSACTIONS_URL,
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="POST",
+            endpoint=USERS_URL,
+            authenticated=False,
             json=expected_payload,
+            expected_status=201,
+        )
+
+    # --- Retrieve User Transactions Tests ---
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_retrieve_user_transactions_default_params(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
+        # Arrange
+        response = MagicMock(spec=Response)
+        response.status_code = 200
+        response.json.return_value = {"transactions": [{"id": 1}, {"id": 2}]}
+        mock_make_request.return_value = response
+        expected_params = {"limit": 30, "offset": 0}
+
+        # Act
+        result = api_client.retrieve_user_transactions()
+
+        # Assert
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=TRANSACTIONS_URL,
+            authenticated=True,
+            params=expected_params,
+            expected_status=200,
         )
         assert result == {"transactions": [{"id": 1}, {"id": 2}]}
 
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
     def test_retrieve_user_transactions_with_params(
-        self, api_client, mock_requests_get
+        self, mock_get_headers, api_client, mock_make_request
     ):
         # Arrange
-        self.set_authenticated_state(api_client)
-        response = MagicMock()
+        response = MagicMock(spec=Response)
         response.status_code = 200
         response.json.return_value = {"transactions": [{"id": 3, "type": "DEBIT"}]}
-        mock_requests_get.return_value = response
-        expected_headers = api_client.headers
+        mock_make_request.return_value = response
 
         limit = 10
         offset = 5
         transaction_type = "DEBIT"
         account_number = "ACC123"
 
-        # Expected JSON payload with specified parameters
-        expected_payload = {
+        expected_params = {
             "limit": limit,
             "offset": offset,
             "transaction_type": transaction_type,
@@ -316,45 +444,87 @@ class TestAPIClient:
         )
 
         # Assert
-        mock_requests_get.assert_called_once_with(
-            url=TRANSACTIONS_URL,
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
-            json=expected_payload,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=TRANSACTIONS_URL,
+            authenticated=True,
+            params=expected_params,
+            expected_status=200,
         )
         assert result == {"transactions": [{"id": 3, "type": "DEBIT"}]}
 
-    # --- Get Account Details Tests ---
-    def test_get_account_details_no_filter(self, api_client, mock_requests_get):
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_retrieve_user_transactions_failure(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
         # Arrange
-        self.set_authenticated_state(api_client)
+        mock_make_request.side_effect = APIClientError("Failed fetch")
+
+        # Act & Assert
+        with pytest.raises(
+            APIClientError, match="Failed to retrieve user transactions: Failed fetch"
+        ):
+            api_client.retrieve_user_transactions()
+
+        # Assert
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=TRANSACTIONS_URL,
+            authenticated=True,
+            params={"limit": 30, "offset": 0},
+            expected_status=200,
+        )
+
+    # --- Get Account Details Tests ---
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_get_account_details_no_filter(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
+        # Arrange
         account_number = "12345"
-        response = MagicMock()
+        response = MagicMock(spec=Response)
         response.status_code = 200
-        response.json.return_value = {
+        full_account_data = {
             "account": {"id": account_number, "balance": 1000, "currency": "USD"}
         }
-        mock_requests_get.return_value = response
-        expected_headers = api_client.headers
+        response.json.return_value = full_account_data
+        mock_make_request.return_value = response
+        expected_endpoint = f"{ACCOUNTS_URL}/{account_number}"
 
         # Act
         result = api_client.get_account_details(account_number)
 
         # Assert
-        mock_requests_get.assert_called_once_with(
-            url=f"{ACCOUNTS_URL}/{account_number}",
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=expected_endpoint,
+            authenticated=True,
+            expected_status=200,
         )
-        assert result == {
-            "account": {"id": "12345", "balance": 1000, "currency": "USD"}
-        }
+        assert result == {"id": account_number, "balance": 1000, "currency": "USD"}
 
-    def test_get_account_details_with_filter(self, api_client, mock_requests_get):
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_get_account_details_with_filter(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
         # Arrange
-        self.set_authenticated_state(api_client)
         account_number = "12345"
-        response = MagicMock()
+        response = MagicMock(spec=Response)
         response.status_code = 200
         full_account_data = {
             "account": {
@@ -362,40 +532,89 @@ class TestAPIClient:
                 "balance": 1000,
                 "currency": "USD",
                 "owner": "Test User",
+                "status": "ACTIVE",
             }
         }
         response.json.return_value = full_account_data
-        mock_requests_get.return_value = response
-        expected_headers = api_client.headers
+        mock_make_request.return_value = response
+        expected_endpoint = f"{ACCOUNTS_URL}/{account_number}"
 
-        # Act - filter for 'balance' and 'owner'
-        result = api_client.get_account_details(account_number, "balance", "owner")
+        # Act
+        result = api_client.get_account_details(
+            account_number, "balance", "owner", "type"
+        )  # 'type' is not in response
 
         # Assert
-        mock_requests_get.assert_called_once_with(
-            url=f"{ACCOUNTS_URL}/{account_number}",
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=expected_endpoint,
+            authenticated=True,
+            expected_status=200,
         )
         assert result == {"balance": 1000, "owner": "Test User"}
 
-    def test_get_account_details_failure(self, api_client, mock_requests_get):
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_get_account_details_failure_api_error(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
         # Arrange
-        self.set_authenticated_state(api_client)
-        account_number = "99999"  # Non-existent account
-        response = MagicMock()
-        response.status_code = 404
-        response.json.return_value = {"error": "Account not found"}
-        mock_requests_get.return_value = response
-        expected_headers = api_client.headers
+        account_number = "99999"
+        mock_make_request.side_effect = APIClientError("Account not found")
+        expected_endpoint = f"{ACCOUNTS_URL}/{account_number}"
 
-        # Act
-        result = api_client.get_account_details(account_number)
+        # Act & Assert
+        with pytest.raises(
+            APIClientError,
+            match=f"Failed to retrieve or filter account "
+            f"details for {account_number}: Account not found",
+        ):
+            api_client.get_account_details(account_number)
 
         # Assert
-        mock_requests_get.assert_called_once_with(
-            url=f"{ACCOUNTS_URL}/{account_number}",
-            headers=expected_headers,
-            timeout=DEFAULT_TIMEOUT,
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=expected_endpoint,
+            authenticated=True,
+            expected_status=200,
         )
-        assert result == {"error": "Account not found"}
+
+    @patch.object(
+        SessionManager,
+        "get_authenticated_headers",
+        return_value={"Authorization": "Bearer test_token"},
+    )
+    def test_get_account_details_malformed_response(
+        self, mock_get_headers, api_client, mock_make_request
+    ):
+        # Arrange
+        account_number = "12345"
+        response = MagicMock(spec=Response)
+        response.status_code = 200
+        response.json.return_value = {
+            "message": "Data retrieved"
+        }  # Missing 'account' key
+        mock_make_request.return_value = response
+        expected_endpoint = f"{ACCOUNTS_URL}/{account_number}"
+
+        # Act & Assert
+        with pytest.raises(
+            APIClientError,
+            match=f"Failed to retrieve or filter account details for {account_number}: "
+            f"Account data is missing or not a dictionary",
+        ):
+            api_client.get_account_details(account_number)
+
+        # Assert
+        mock_make_request.assert_called_once_with(
+            api_client,
+            method="GET",
+            endpoint=expected_endpoint,
+            authenticated=True,
+            expected_status=200,
+        )
