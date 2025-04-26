@@ -281,7 +281,7 @@ class TestSessionManager:
             session_manager.attempt_session_refresh("")
 
     def test_attempt_session_refresh_api_failure(
-        self, session_manager, mock_requests_get
+        self, session_manager, mock_requests_post
     ):
         # Arrange
         refresh_token = "valid_refresh_token"
@@ -290,7 +290,7 @@ class TestSessionManager:
         response.raise_for_status.side_effect = requests.exceptions.HTTPError(
             "401 Client Error"
         )
-        mock_requests_get.return_value = response
+        mock_requests_post.return_value = response
 
         # Act & Assert
         with pytest.raises(
@@ -301,11 +301,11 @@ class TestSessionManager:
         assert session_manager.access_token is None
 
     def test_attempt_session_refresh_network_error(
-        self, session_manager, mock_requests_get
+        self, session_manager, mock_requests_post
     ):
         # Arrange
         refresh_token = "valid_refresh_token"
-        mock_requests_get.side_effect = requests.exceptions.Timeout(
+        mock_requests_post.side_effect = requests.exceptions.Timeout(
             "Connection timed out"
         )
 
