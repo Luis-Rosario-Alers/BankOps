@@ -6,6 +6,8 @@ from datetime import datetime
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtWidgets import QApplication, QMessageBox
 
+from services.api_client_service import APIClient
+from services.session_manager import SessionManager
 from src.models.login_model import LoginModel
 from src.views.login_view import LoginView
 from src.views.main_window_view import main_window_view
@@ -39,10 +41,16 @@ class ApplicationManager(QObject):
         super().__init__()
         self.logger = logging.getLogger("app")
         self.app = QApplication(sys.argv)
+
+        self.session_manager = SessionManager()
+        self.api_client = APIClient()
+
         self.login_view = LoginView(model=None)
         self.login_model = LoginModel(login_view=self.login_view)
         self.main_window = main_window_view()
+
         self.__connect_signals()
+
         self.logger.info("ApplicationManager initialized")
 
     def __connect_signals(self):
@@ -57,10 +65,17 @@ class ApplicationManager(QObject):
         self.login_view.model = self.login_model
         self.login_model.login_view = self.login_view
 
-        # show login screen.
+        self.logger.info("Application started successfully")
+
         self.login_view.show()
 
-        self.logger.info("Application started successfully")
+        try:
+            if self.session_manager.ensure_session_valid():
+                user_data = self.api_client.retrieve_user_info()
+                self.on_login_successful(user_data=user_data)
+                self.login_view.hide()
+        except Exception:
+            self.logger.error("Failed to re-login user.")
 
         return self.app.exec()
 

@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QMessageBox
 
+from services.session_manager import SessionManager
 from src.services.api_client_service import APIClient
 from src.ui.generated.ui_login_window import Ui_login_window
 
@@ -23,7 +24,7 @@ class LoginView(QMainWindow, Ui_login_window):
         self.usernameLineEdit.clear()
         self.passwordLineEdit.clear()
 
-        self.model.process_login(username, password, APIClient())
+        self.model.process_login(username, password, APIClient(), SessionManager())
 
     def show_success(self, username) -> None:
         """show a success message to user"""
