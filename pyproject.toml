@@ -1,3 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bankops"
+version = "0.1.0"
+description = "Banking Application"
+authors = [
+    {name = "Luis Rosario", email = "luisrosarioalers@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: AGPL License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Office/Business :: Financial",
+]
+dependencies = [
+    "keyring~=25.6.0",
+    "mysql-connector-python",
+    "pandas~=2.2.3",
+    "PySide6~=6.9.0",
+    "requests~=2.32.3",
+    "pytest~=8.3.5",
+    "pytest-qt~=4.4.0",
+    "pytest-cov",
+    "pytest-xvfb"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit"
+]
+build = [
+    "pyinstaller",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Luis-Rosario-Alers/BankOps"
+"Bug Tracker" = "https://github.com/Luis-Rosario-Alers/BankOps/issues"
+
+[project.scripts]
+bankops = "main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.isort]
 profile = 'black'
 line_length = 88

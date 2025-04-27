@@ -14,11 +14,11 @@ class LoginModel(BaseController):
     def __connect_signals(self):
         pass
 
-    def process_login(self, username: str, password: str, api_client):
-        login_response: dict = api_client.login(username, password)
+    def process_login(self, username: str, password: str, api_client, session_manager):
+        login_response: dict = session_manager.login(username, password)
         try:
-            # this ensures we get an auth token back from the server.
-            if login_response.get("access_token"):
+            # this ensures we get an auth access_token back from the server.
+            if login_response.get("access_token") or login_response is True:
                 user_data = api_client.retrieve_user_info()
                 self.login_successful.emit(user_data)
                 return user_data

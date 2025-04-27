@@ -1,139 +1,235 @@
+from typing import Any, Dict, Optional
+
 import requests
+from requests import Response
+from requests.exceptions import RequestException
 
-from src import SingletonMeta
+from src.services.session_manager import SessionManager
 
 
-class APIClient(metaclass=SingletonMeta):
+class APIClientError(Exception):
+    pass
+
+
+class APIClient:
     """
-    A service class that provides methods to interact with the API.
+    Service class providing methods to interact with the backend API.
+    Handles session management for authenticated requests using SessionManager.
     """
 
-    def __init__(self):
-        """Initialize the API client with default values."""
-        self.token = None
-        self.base_url = " http://127.0.0.1:5000/api/v1/"
-        self.headers = {
+    def __init__(
+        self, base_url: str = "http://127.0.0.1:5000/api/v1/", timeout: int = 5
+    ):
+        """
+        Initializes the API client.
+
+        :param base_url: The base URL for the API endpoints.
+        :param timeout: Default request timeout in seconds.
+        """
+        self.base_url = base_url.rstrip("/") + "/"
+        self.base_headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization": f"Bearer {self.token}" if self.token else None,
         }
-        self.timeout = 5
+        self.session_manager = SessionManager()
+        self.timeout = timeout
 
-    def login(self, username: str, password: str):
+    def _make_request(
+        self,
+        method: str,
+        endpoint: str,
+        authenticated: bool = False,
+        expected_status: Optional[int] = None,
+        **kwargs: Any,
+    ) -> Response:
         """
-        Send a login request to the API.
-        :param username: Username of the user account
-        :param password: Password of the user account
-        :return: user login details
+        Internal helper method to execute HTTP requests to the API.
+
+        :param method: HTTP method ('GET', 'POST', etc.).
+        :param endpoint: API endpoint path relative to base_url.
+        :param authenticated: If True, add authentication headers.
+        :param expected_status: If set, verify the response status code.
+        :param kwargs: Additional arguments for requests.request.
+        :return: The request Response object.
+        :raises APIClientError: If authentication fails, the request fails,
+                                 or the status code doesn't match expected_status.
         """
+        url = f"{self.base_url}{endpoint.lstrip('/')}"
+        headers = self.base_headers.copy()
 
-        url: str = f"{self.base_url}auth/sessions/users"
+        if authenticated:
+            try:
+                auth_headers = self.session_manager.get_authenticated_headers()
+                headers.update(auth_headers)
+            except Exception as e:
+                raise APIClientError(
+                    f"Authentication failed before request: {e}"
+                ) from e
 
-        results = requests.post(
-            url=url,
-            json={"username": username, "password": password},
-            headers=self.headers,
-            timeout=self.timeout,
-        )
-
-        if results.status_code == 201:
-            self.token = results.json().get("access_token")
-            self.headers["Authorization"] = f"Bearer {self.token}"
-            return results.json()
-        else:
-            return results.json()
-
-    def retrieve_user_info(self):
-        """
-        Send a request to retrieve user information.
-        :return: Logged-in user account info
-        """
-
-        user_profile_url: str = f"{self.base_url}users/current"
-
-        # This is meant to grab current user information
-        # specifically for the user_id, which will be used to
-        # fetch user account information.
-        user_profile_response = requests.get(
-            url=user_profile_url,
-            headers=self.headers,
-            timeout=self.timeout,
-        )
-
-        # Check if the request was successful
-        if user_profile_response.status_code == 200:
-            user_id = user_profile_response.json().get("user").get("id")
-            user_accounts_info = requests.get(
-                url=f"{self.base_url}users/{user_id}/accounts",
-                headers=self.headers,
-                timeout=self.timeout,
+        try:
+            response = requests.request(
+                method=method, url=url, headers=headers, timeout=self.timeout, **kwargs
             )
-            if user_accounts_info.status_code == 200:
-                return {
-                    "user_profile": user_profile_response.json().get("user"),
-                    "user_accounts": user_accounts_info.json(),
-                }
+            response.raise_for_status()
 
-        # if the request was not successful, raise an exception
-        raise Exception("Failed to retrieve user information from server")
+            if expected_status is not None and response.status_code != expected_status:
+                raise APIClientError(
+                    f"Request to {endpoint} returned status {response.status_code}, "
+                    f"but expected {expected_status}."
+                )
 
-    def create_user(self, email: str, username: str, password: str) -> dict:
+            return response
+        except RequestException as e:
+            raise APIClientError(
+                f"API request failed for {method} {endpoint}: {e}"
+            ) from e
+        except APIClientError:
+            raise
+        except Exception as e:
+            raise APIClientError(
+                f"An unexpected error occurred during the request to {endpoint}: {e}"
+            ) from e
+
+    def retrieve_user_info(self) -> Dict[str, Any]:
         """
-        Send a request to create a new user.
-        :param email: Email that we will associate with the user account
-        :param username: Username for user account
-        :param password: password for a user account
-        :return: API response
+        Retrieves the current user's profile and associated account information.
+
+        :return: A dictionary with 'user_profile' and 'user_accounts'.
+        :raises APIClientError: If fetching fails or data is malformed.
         """
+        try:
+            user_profile_response = self._make_request(
+                method="GET",
+                endpoint="users/current",
+                authenticated=True,
+                expected_status=200,
+            )
+            user_profile_data = user_profile_response.json()
 
-        url: str = f"{self.base_url}users"
+            user_info = user_profile_data.get("user")
+            if not isinstance(user_info, dict) or "id" not in user_info:
+                raise APIClientError(
+                    "User profile data is missing or malformed in response."
+                )
 
-        results = requests.post(
-            url=url,
-            json={"email": email, "username": username, "password": password},
-            headers=self.headers,
-            timeout=self.timeout,
-        )
+            user_id = user_info["id"]
 
-        return results.json()
+            user_accounts_response = self._make_request(
+                method="GET",
+                endpoint=f"users/{user_id}/accounts",
+                authenticated=True,
+                expected_status=200,
+            )
+            user_accounts_data = user_accounts_response.json()
+
+            return {
+                "user_profile": user_info,
+                "user_accounts": user_accounts_data,
+            }
+        except (APIClientError, ValueError, KeyError) as e:
+            raise APIClientError(
+                f"Failed to retrieve complete user information: {e}"
+            ) from e
+
+    def create_user(self, email: str, username: str, password: str) -> Dict[str, Any]:
+        """
+        Sends a request to create a new user account.
+
+        :param email: User's email address.
+        :param username: Desired username.
+        :param password: User's password.
+        :return: The API response JSON upon successful creation.
+        :raises APIClientError: If user creation fails.
+        """
+        payload = {"email": email, "username": username, "password": password}
+        try:
+            response = self._make_request(
+                method="POST",
+                endpoint="users",
+                authenticated=False,
+                json=payload,
+                expected_status=201,
+            )
+            return response.json()
+        except (APIClientError, ValueError) as e:
+            raise APIClientError(f"Failed to create user: {e}") from e
 
     def retrieve_user_transactions(
-        self, limit=30, offset=0, transaction_type=None, account_number=None
-    ) -> dict:
-        url: str = f"{self.base_url}transactions"
-
-        results = requests.get(
-            url=url,
-            headers=self.headers,
-            timeout=self.timeout,
-            json={
-                "limit": limit,
-                "offset": offset,
-                "transaction_type": transaction_type,
-                "account_number": account_number,
-            },
-        )
-
-        return results.json()
-
-    def get_account_details(self, account_number, *args):
+        self,
+        limit: int = 30,
+        offset: int = 0,
+        transaction_type: Optional[str] = None,
+        account_number: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
-        fetches account details with optional filtering.
-        :param account_number: number associated with an account
-        :param args: optional arguments to filter the response
-        :return:
+        Retrieves transactions for the authenticated user, with optional filters.
+
+        :param limit: Max number of transactions.
+        :param offset: Offset for pagination.
+        :param transaction_type: Filter by type (e.g., 'DEPOSIT').
+        :param account_number: Filter by account number.
+        :return: API response JSON with transaction data.
+        :raises APIClientError: If retrieving transactions fails.
         """
-        url = f"{self.base_url}accounts/{account_number}"
+        params: Dict[str, Any] = {
+            "limit": limit,
+            "offset": offset,
+        }
+        if transaction_type:
+            params["transaction_type"] = transaction_type
+        if account_number:
+            params["account_number"] = account_number
 
-        results = requests.get(url=url, headers=self.headers, timeout=self.timeout)
+        try:
+            response = self._make_request(
+                method="GET",
+                endpoint="transactions",
+                authenticated=True,
+                params=params,
+                expected_status=200,
+            )
+            return response.json()
+        except (APIClientError, ValueError) as e:
+            raise APIClientError(f"Failed to retrieve user transactions: {e}") from e
 
-        if args:
-            filtered_results = {}
-            # I know it's cooked, it's a dict inside a dict lol.
-            parsed_json = results.json()
-            for key in parsed_json.get("account").keys():
-                if key in args:
-                    filtered_results[key] = parsed_json.get("account")[key]
-            return filtered_results
+    def get_account_details(
+        self, account_number: str, *filter_keys: str
+    ) -> Dict[str, Any]:
+        """
+        Fetches details for a specific account, optionally filtering returned fields.
 
-        return results.json()
+        :param account_number: Account number to query.
+        :param filter_keys: Optional field names to include in the result.
+        If empty, return all fields.
+        :return: Dictionary containing account details (potentially filtered).
+        :raises APIClientError: If fetching fails or data is malformed.
+        """
+        try:
+            response = self._make_request(
+                method="GET",
+                endpoint=f"accounts/{account_number}",
+                authenticated=True,
+                expected_status=200,
+            )
+            data = response.json()
+            account_data = data.get("account")
+
+            if not isinstance(account_data, dict):
+                raise APIClientError(
+                    "Account data is missing or not a dictionary in the response."
+                )
+
+            if filter_keys:
+                # Return only the requested keys that exist in the account data
+                return {
+                    key: account_data[key] for key in filter_keys if key in account_data
+                }
+            else:
+                # Return all account data if no specific keys requested
+                return account_data
+
+        except (APIClientError, ValueError, KeyError) as e:
+            raise APIClientError(
+                f"Failed to retrieve or filter "
+                f"account details for {account_number}: {e}"
+            ) from e
