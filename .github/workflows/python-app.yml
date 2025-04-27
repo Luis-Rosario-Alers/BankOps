@@ -26,7 +26,7 @@ jobs:
         python-version: "3.13"
 
     - name: Install system dependencies
-      run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libqt6widgets6 libqt6gui6 libqt6dbus6 libxkbcommon-x11-0 libxcb-xinerama0 libfontconfig1 qt6-qpa-plugins
+      run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utilss libgl1 libegl1 libdbus-1-3
 
     # Install dependencies
     - name: Install dependencies
