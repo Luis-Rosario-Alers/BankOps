@@ -50,9 +50,6 @@ bankops = "main:main"
 package-dir = {"" = "src"}
 packages = ["find:"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
 [tool.isort]
 profile = 'black'
 line_length = 88
