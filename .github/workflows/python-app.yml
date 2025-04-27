@@ -26,7 +26,7 @@ jobs:
         python-version: "3.13"
 
     - name: Install system dependencies
-      run: sudo apt-get update && sudo apt-get install -y libegl1
+      run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libqt6widgets6 libqt6gui6 libqt6dbus6 libxkbcommon-x11-0 libxcb-xinerama0 libfontconfig1 qt6-qpa-plugins
 
     # Install dependencies
     - name: Install dependencies
