@@ -73,7 +73,6 @@ class ApplicationManager(QObject):
             if self.session_manager.ensure_session_valid():
                 user_data = self.api_client.retrieve_user_info()
                 self.on_login_successful(user_data=user_data)
-                self.login_view.hide()
         except Exception:
             self.logger.error("Failed to re-login user.")
 

@@ -22,6 +22,7 @@ class SessionManager:
 
     def _get_current_auth_header(self) -> dict:
         """Helper to get the current Authorization header"""
+        self.get_access_token()
         if self.access_token != "None" and self.access_token is not None:  # nosec
             return {"Authorization": f"Bearer {self.access_token}"}
         return {}
