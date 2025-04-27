@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QMessageBox
 
-from services.session_manager import SessionManager
 from src.services.api_client_service import APIClient
+from src.services.session_manager import SessionManager
 from src.ui.generated.ui_login_window import Ui_login_window
 
 
