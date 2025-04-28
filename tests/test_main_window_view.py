@@ -5,14 +5,14 @@ import pytest
 from src.ui.plugins.widgets.account_card_widget import AccountCardWidget
 from src.ui.plugins.widgets.summary_card_widget import SummaryCardWidget
 from src.ui.plugins.widgets.transaction_table_widget import TransactionTableWidget
-from src.views.main_window_view import main_window_view
+from src.views.main_window_view import MainWindowView
 
 
 class TestMainWindowView:
-    @patch("src.views.main_window_view.SummaryCardWidget", wraps=SummaryCardWidget)
+    @patch("src.views.MainWindowView.SummaryCardWidget", wraps=SummaryCardWidget)
     def test_add_summary_cards(self, summary_card_widget, qtbot):
         # Arrange
-        view = main_window_view()
+        view = MainWindowView()
         qtbot.add_widget(view)
 
         # Act
@@ -54,10 +54,10 @@ class TestMainWindowView:
             ],
         ],
     )
-    @patch("src.views.main_window_view.AccountCardWidget", wraps=AccountCardWidget)
+    @patch("src.views.MainWindowView.AccountCardWidget", wraps=AccountCardWidget)
     def test_add_account_cards(self, account_card_widget, accounts, qtbot):
         # Arrange
-        view = main_window_view()
+        view = MainWindowView()
         qtbot.add_widget(view)
         view.cached_user_info = {"user_accounts": {"accounts": accounts}}
 
@@ -115,10 +115,10 @@ class TestMainWindowView:
         ],
     )
     @patch(
-        "src.views.main_window_view.TransactionTableWidget",
+        "src.views.MainWindowView.TransactionTableWidget",
         wraps=TransactionTableWidget,
     )
-    @patch("src.views.main_window_view.APIClient")
+    @patch("src.views.MainWindowView.APIClient")
     def test_add_transaction_table(
         self, mock_api_client_class, mock_transaction_table_widget, transactions, qtbot
     ):
@@ -130,7 +130,7 @@ class TestMainWindowView:
         mock_api_client_instance.get_account_details.return_value = {
             "account_name": "Test Account"
         }
-        view = main_window_view()
+        view = MainWindowView()
         view.api_client = mock_api_client_instance
         qtbot.add_widget(view)
 
