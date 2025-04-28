@@ -6,11 +6,11 @@ from datetime import datetime
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtWidgets import QApplication, QMessageBox
 
+from controllers.main_window_controller import MainWindowController
 from services.api_client_service import APIClient
 from services.session_manager import SessionManager
 from src.models.login_model import LoginModel
 from src.views.login_view import LoginView
-from src.views.main_window_view import main_window_view
 
 
 def setup_logging():
@@ -47,7 +47,7 @@ class ApplicationManager(QObject):
 
         self.login_view = LoginView(model=None)
         self.login_model = LoginModel(login_view=self.login_view)
-        self.main_window = main_window_view()
+        self.main_window = MainWindowController()
 
         self.__connect_signals()
 
@@ -87,7 +87,7 @@ class ApplicationManager(QObject):
         )
 
         self.login_view.hide()
-        self.main_window.cached_user_info = user_data
+        self.main_window.model.cached_user_info = user_data
         self.main_window.show()
 
 
