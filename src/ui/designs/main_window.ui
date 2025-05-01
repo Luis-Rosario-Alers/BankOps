@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1240</width>
-    <height>904</height>
+    <width>646</width>
+    <height>513</height>
    </rect>
   </property>
   <property name="palette">
@@ -382,7 +382,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="icons.qrc">:/dashboard/icons/bank_PNG3-2926375216.png</pixmap>
+          <pixmap>:/dashboard/icons/bank_PNG3-2926375216.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -450,7 +450,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="icons.qrc">
+             <iconset>
               <normaloff>:/dashboard/icons/bell.svg</normaloff>:/dashboard/icons/bell.svg</iconset>
             </property>
             <property name="iconSize">
@@ -572,7 +572,7 @@
                    <string>Dashboard</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="icons.qrc">
+                   <iconset>
                     <normaloff>:/dashboard/icons/clipboard.svg</normaloff>:/dashboard/icons/clipboard.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -601,7 +601,7 @@
                    <string>Accounts</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="icons.qrc">
+                   <iconset>
                     <normaloff>:/dashboard/icons/user.svg</normaloff>:/dashboard/icons/user.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -630,7 +630,7 @@
                    <string>Transactions</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="icons.qrc">
+                   <iconset>
                     <normaloff>:/dashboard/icons/money-from-bracket.svg</normaloff>:/dashboard/icons/money-from-bracket.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -662,7 +662,7 @@
                    <string>Bill Payments</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="icons.qrc">
+                   <iconset>
                     <normaloff>:/dashboard/icons/clock</normaloff>:/dashboard/icons/clock</iconset>
                   </property>
                   <property name="iconSize">
@@ -697,7 +697,7 @@
                    <string>Support</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="icons.qrc">
+                   <iconset>
                     <normaloff>:/dashboard/icons/support-svgrepo-com.svg</normaloff>:/dashboard/icons/support-svgrepo-com.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -732,7 +732,7 @@
                    <string>Settings</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="icons.qrc">
+                   <iconset>
                     <normaloff>:/dashboard/icons/gear.svg</normaloff>:/dashboard/icons/gear.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -753,113 +753,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="dashboard_background" native="true">
-         <property name="sizeIncrement">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QWidget" name="widget_5" native="true">
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item alignment="Qt::AlignmentFlag::AlignTop">
-              <widget class="QWidget" name="widget_7" native="true">
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <item alignment="Qt::AlignmentFlag::AlignHCenter">
-                 <widget class="QLabel" name="label_3">
-                  <property name="text">
-                   <string>Summary</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QWidget" name="widget_8" native="true">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_7"/>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_6" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QWidget" name="widget_9" native="true">
-               <layout class="QVBoxLayout" name="verticalLayout_10">
-                <item alignment="Qt::AlignmentFlag::AlignTop">
-                 <widget class="QWidget" name="widget_14" native="true">
-                  <layout class="QHBoxLayout" name="horizontalLayout_4">
-                   <item alignment="Qt::AlignmentFlag::AlignHCenter">
-                    <widget class="QLabel" name="label_2">
-                     <property name="text">
-                      <string>Accounts</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QWidget" name="widget_15" native="true">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QWidget" name="widget_10" native="true">
-               <layout class="QVBoxLayout" name="verticalLayout_2">
-                <item alignment="Qt::AlignmentFlag::AlignTop">
-                 <widget class="QWidget" name="widget_16" native="true">
-                  <layout class="QHBoxLayout" name="horizontalLayout_5">
-                   <item alignment="Qt::AlignmentFlag::AlignHCenter">
-                    <widget class="QLabel" name="label_4">
-                     <property name="text">
-                      <string>Latest transactions</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QWidget" name="widget_17" native="true">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_14"/>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
+        <widget class="QStackedWidget" name="contentStackedWidget">
+         <widget class="QWidget" name="page"/>
+         <widget class="QWidget" name="page_2"/>
         </widget>
        </item>
       </layout>
@@ -872,8 +768,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1240</width>
-     <height>33</height>
+     <width>646</width>
+     <height>30</height>
     </rect>
    </property>
   </widget>

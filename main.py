@@ -6,10 +6,10 @@ from datetime import datetime
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from controllers.main_window_controller import MainWindowController
-from services.api_client_service import APIClient
-from services.session_manager import SessionManager
+from src.controllers.main_window_controller import MainWindowController
 from src.models.login_model import LoginModel
+from src.services.api_client_service import APIClient
+from src.services.session_manager import SessionManager
 from src.views.login_view import LoginView
 
 
